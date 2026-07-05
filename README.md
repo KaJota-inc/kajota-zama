@@ -1,110 +1,106 @@
-# FHEVM Hardhat Template
+# KaJota Confidential Pay
 
-A Hardhat-based template for developing Fully Homomorphic Encryption (FHE) enabled Solidity smart contracts using the
-FHEVM protocol by Zama.
+**Private payments on Ethereum, powered by Zama FHEVM.** Balances and transfer
+amounts are Fully-Homomorphically Encrypted end-to-end — the chain stores only
+ciphertext, and only an account owner can decrypt their own balance.
 
-## Quick Start
+Built for the **Zama Developer Program — Mainnet Season 3** (_Composable Privacy Is the Key_).
+Addresses two tracks with one codebase:
 
-For detailed instructions see:
-[FHEVM Hardhat Quick Start Tutorial](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial)
-
-### Prerequisites
-
-- **Node.js**: Version 20 or higher
-- **npm or yarn/pnpm**: Package manager
-
-### Installation
-
-1. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-2. **Set up environment variables**
-
-   ```bash
-   npx hardhat vars set MNEMONIC
-
-   # Set your Infura API key for network access
-   npx hardhat vars set INFURA_API_KEY
-
-   # Optional: Set Etherscan API key for contract verification
-   npx hardhat vars set ETHERSCAN_API_KEY
-   ```
-
-3. **Compile and test**
-
-   ```bash
-   npm run compile
-   npm run test
-   ```
-
-4. **Deploy to local network**
-
-   ```bash
-   # Start a local FHEVM-ready node
-   npx hardhat node
-   # Deploy to local network
-   npx hardhat deploy --network localhost
-   ```
-
-5. **Deploy to Sepolia Testnet**
-
-   ```bash
-   # Deploy to Sepolia
-   npx hardhat deploy --network sepolia
-   # Verify contract on Etherscan
-   npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
-   ```
-
-6. **Test on Sepolia Testnet**
-
-   ```bash
-   # Once deployed, you can run a simple test on Sepolia.
-   npx hardhat test --network sepolia
-   ```
-
-## 📁 Project Structure
-
-```
-fhevm-hardhat-template/
-├── contracts/           # Smart contract source files
-│   └── FHECounter.sol   # Example FHE counter contract
-├── deploy/              # Deployment scripts
-├── tasks/               # Hardhat custom tasks
-├── test/                # Test files
-├── hardhat.config.ts    # Hardhat configuration
-└── package.json         # Dependencies and scripts
-```
-
-## 📜 Available Scripts
-
-| Script             | Description              |
-| ------------------ | ------------------------ |
-| `npm run compile`  | Compile all contracts    |
-| `npm run test`     | Run all tests            |
-| `npm run coverage` | Generate coverage report |
-| `npm run lint`     | Run linting checks       |
-| `npm run clean`    | Clean build artifacts    |
-
-## 📚 Documentation
-
-- [FHEVM Documentation](https://docs.zama.ai/fhevm)
-- [FHEVM Hardhat Setup Guide](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup)
-- [FHEVM Testing Guide](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat/write_test)
-- [FHEVM Hardhat Plugin](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat)
-
-## 📄 License
-
-This project is licensed under the BSD-3-Clause-Clear License. See the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/zama-ai/fhevm/issues)
-- **Documentation**: [FHEVM Docs](https://docs.zama.ai)
-- **Community**: [Zama Discord](https://discord.gg/zama)
+- **Builder Track** — a confidential payment dApp (smart contract + frontend).
+- **Special Bounty (TokenOps) Track** — a confidential **disperse** flow that splits a
+  private balance across many recipients, every amount encrypted.
 
 ---
 
-**Built with ❤️ by the Zama team**
+## Why it matters
+
+KaJota builds payment rails for African commerce. On a public chain, every payroll
+run, supplier payment, or remittance leaks amounts and balances to competitors and
+onlookers. FHEVM lets the settlement happen **on encrypted values**: the contract can
+check "can this account afford it?" and move funds **without ever decrypting** either
+side. A failed (over-budget) transfer is cryptographically indistinguishable from a
+successful one, so even the _existence_ of sufficient funds stays private.
+
+## How it works
+
+`ConfidentialPay.sol` keeps an `euint64` encrypted balance per account.
+
+| Function | What it does |
+| --- | --- |
+| `claimFaucet()` | One-time demo grant; seeds an encrypted balance of 10,000. |
+| `confidentialTransfer(to, encAmount, proof)` | Encrypted transfer. Overspend is clamped to **encrypted zero** via `FHE.select` — no branch, no leak. |
+| `confidentialDisperse(recipients[], encAmounts[], proofs[])` | The TokenOps flow: many private transfers in one tx. |
+| `balanceOf(account) → euint64` | Returns the ciphertext handle; only the owner is ACL-granted to decrypt it. |
+
+The core privacy guarantee (from `_transfer`):
+
+```solidity
+ebool canSend = FHE.le(amount, fromBalance);            // compare on ciphertext
+euint64 sent  = FHE.select(canSend, amount, FHE.asEuint64(0)); // clamp overspend to 0
+_balances[from] = FHE.sub(fromBalance, sent);
+_balances[to]   = FHE.add(toBalance, sent);
+```
+
+The frontend uses `@zama-fhe/relayer-sdk` to encrypt amounts client-side and to
+run the EIP-712 user-decryption handshake so a user can read _their own_ clear
+balance in the browser.
+
+## Stack
+
+- **Contracts:** `@fhevm/solidity` 0.11.x, Hardhat, Solidity 0.8.27 (cancun).
+- **Frontend:** Vite + React + ethers v6 + `@zama-fhe/relayer-sdk` 0.4.x.
+- **Network:** Ethereum **Sepolia** (FHEVM coprocessor + relayer).
+
+## Quick start
+
+### 1. Contracts
+
+```bash
+npm install
+npm run compile
+npm test                       # 8/8 mock FHE tests
+```
+
+Set your secrets (used for Sepolia):
+
+```bash
+npx hardhat vars set MNEMONIC          # a funded Sepolia mnemonic
+npx hardhat vars set INFURA_API_KEY    # or any Sepolia RPC key
+npx hardhat vars set ETHERSCAN_API_KEY # optional, for verify
+```
+
+Deploy + exercise on Sepolia (each of these is a real on-chain tx):
+
+```bash
+npm run deploy:sepolia
+npx hardhat --network sepolia confidential-pay:faucet
+npx hardhat --network sepolia confidential-pay:balance
+npx hardhat --network sepolia confidential-pay:transfer --to 0xRecipient --amount 250
+npx hardhat --network sepolia verify:sepolia   # optional
+```
+
+### 2. Frontend
+
+```bash
+cd frontend
+cp .env.example .env            # set VITE_CONTRACT_ADDRESS to the deployed address
+npm install
+npm run dev                     # open the printed localhost URL, connect MetaMask on Sepolia
+```
+
+## Repo layout
+
+```
+contracts/ConfidentialPay.sol   confidential payment ledger (FHEVM)
+test/ConfidentialPay.ts         mock FHE test suite (8 tests)
+tasks/ConfidentialPay.ts        faucet / balance / transfer hardhat tasks
+deploy/deploy.ts                hardhat-deploy script
+frontend/                       Vite + React dApp (relayer SDK)
+SUBMISSION.md                   track write-up
+DEMO_SCRIPT.md                  3-minute video script
+```
+
+## License
+
+MIT.
