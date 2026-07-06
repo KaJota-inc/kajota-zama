@@ -15,7 +15,15 @@ import "./tasks/ConfidentialPay";
 // Run 'npx hardhat vars setup' to see the list of variables that need to be set
 
 const MNEMONIC: string = vars.get("MNEMONIC", "test test test test test test test test test test test junk");
-const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+
+// Provider-agnostic Sepolia RPC. Set a full URL via `npx hardhat vars set SEPOLIA_RPC_URL`
+// (Alchemy, dRPC, PublicNode, etc.). Falls back to an Infura URL if you set INFURA_API_KEY,
+// then to a public endpoint as a last resort.
+const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "");
+const SEPOLIA_RPC_URL: string = vars.get(
+  "SEPOLIA_RPC_URL",
+  INFURA_API_KEY ? `https://sepolia.infura.io/v3/${INFURA_API_KEY}` : "https://ethereum-sepolia-rpc.publicnode.com",
+);
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -55,7 +63,7 @@ const config: HardhatUserConfig = {
         count: 10,
       },
       chainId: 11155111,
-      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      url: SEPOLIA_RPC_URL,
     },
   },
   paths: {
