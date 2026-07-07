@@ -7,10 +7,10 @@ cd "$(dirname "$0")/.."
 VOICE="${VOICE:-Samantha}"
 RATE="${RATE:-172}"
 SRC="docs/demo/kajota-zama-demo-full-captioned.mp4"
-OUT="docs/demo/kajota-zama-demo-full-voiced.mp4"
+OUT="${OUT:-docs/demo/kajota-zama-demo-full-voiced.mp4}"
 VO="/tmp/vo"; mkdir -p "$VO"
 
-START=(400 8000 15500 23000 31000 39000 47000 63000 71000 80000 96000)
+START=(400 8800 15800 23200 31000 39000 47000 63000 71000 80000 96000)
 TEXT=(
 "Every payment on a public blockchain is exposed. Kajota Confidential Pay keeps the amounts private, powered by F.H.E.V.M."
 "I connect a Sepolia wallet. From here, every balance and every amount lives on-chain, fully encrypted."
