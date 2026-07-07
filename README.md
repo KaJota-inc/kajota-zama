@@ -20,6 +20,8 @@ Submitted to the **Zama Developer Program — Mainnet Season 3** (Builder Track 
 
 ![Contract tests + on-chain proofs](docs/demo/kajota-zama-terminal.gif)
 
+▶ **Full stitched walkthrough (video):** [`docs/demo/kajota-zama-demo-full.mp4`](docs/demo/kajota-zama-demo-full.mp4) — live app flow + contract tests + on-chain proofs, ~2 min, paced for voiceover.
+
 ## Live on Sepolia
 
 | | |
