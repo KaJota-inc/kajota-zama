@@ -20,7 +20,7 @@ Submitted to the **Zama Developer Program — Mainnet Season 3** (Builder Track 
 
 ![Contract tests + on-chain proofs](docs/demo/kajota-zama-terminal.gif)
 
-▶ **Full stitched walkthrough (video, captioned):** [`docs/demo/kajota-zama-demo-full-captioned.mp4`](docs/demo/kajota-zama-demo-full-captioned.mp4) — live app flow + contract tests + on-chain proofs, ~2 min, captioned and paced for voiceover. (Uncaptioned cut: [`kajota-zama-demo-full.mp4`](docs/demo/kajota-zama-demo-full.mp4); caption source: `docs/demo/captions.srt`.)
+▶ **Narrated walkthrough (video):** [`docs/demo/kajota-zama-demo-full-voiced.mp4`](docs/demo/kajota-zama-demo-full-voiced.mp4) — ~2 min, captioned + voiceover: live app flow (faucet → decrypt 10,000 → transfer → re-decrypt 7,500 → disperse) then contract tests + on-chain proofs. (Also: [captioned, no VO](docs/demo/kajota-zama-demo-full-captioned.mp4) · [plain](docs/demo/kajota-zama-demo-full.mp4); scripts in `docs/VOICEOVER.md` / `captions.srt`.)
 
 ## Live on Sepolia
 
