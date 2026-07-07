@@ -27,6 +27,7 @@ KaJota settles real payments on-chain for African merchants and remitters. A pub
 | ConfidentialPay | `0xe4292f6aF1FA9668713269bE1643354a557BF342` |
 | Deploy tx | `0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770` (block 11218847) |
 | Confidential faucet tx (FHE compute on-chain) | `0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504` (block 11218856) |
+| **Confidential transfer tx** (encrypted amount, on-chain FHE.le/select) | `0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6` (block 11218942) |
 | Example encrypted balance handle | `0xe44ea3240fdb65bbd0be29d1762cd0961768b7a707ff0000000000aa36a70500` |
 
 Etherscan: https://sepolia.etherscan.io/address/0xe4292f6aF1FA9668713269bE1643354a557BF342

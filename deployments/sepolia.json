@@ -22,6 +22,15 @@
       "block": 11218856,
       "encryptedBalanceHandle": "0xe44ea3240fdb65bbd0be29d1762cd0961768b7a707ff0000000000aa36a70500",
       "explorer": "https://sepolia.etherscan.io/tx/0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504"
+    },
+    {
+      "action": "confidentialTransfer — encrypted amount (ciphertext + input proof) transferred and computed on-chain via FHE.le/FHE.select; amount never in cleartext",
+      "tx": "0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6",
+      "block": 11218942,
+      "from": "0xC58A7717fdf1Bc40dFb63b02ab54D6CF6c8F7093",
+      "to": "0xE45E6b01742CDB4e3aECFEb364b2967415C551c1",
+      "recipientEncryptedBalanceHandle": "0x14f4a3578a61075c70c5f17bda688c0e42e157b18eff0000000000aa36a70500",
+      "explorer": "https://sepolia.etherscan.io/tx/0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6"
     }
   ]
 }
