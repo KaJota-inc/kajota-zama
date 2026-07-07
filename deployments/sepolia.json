@@ -1,0 +1,27 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "contracts": {
+    "ConfidentialPay": {
+      "address": "0xe4292f6aF1FA9668713269bE1643354a557BF342",
+      "deployTx": "0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770",
+      "deployBlock": 11218847
+    }
+  },
+  "deployer": "0xC58A7717fdf1Bc40dFb63b02ab54D6CF6c8F7093",
+  "onchainProofs": [
+    {
+      "action": "deploy ConfidentialPay",
+      "tx": "0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770",
+      "block": 11218847,
+      "explorer": "https://sepolia.etherscan.io/tx/0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770"
+    },
+    {
+      "action": "claimFaucet — executes FHE.asEuint64 + FHE.add + ACL grants on-chain",
+      "tx": "0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504",
+      "block": 11218856,
+      "encryptedBalanceHandle": "0xe44ea3240fdb65bbd0be29d1762cd0961768b7a707ff0000000000aa36a70500",
+      "explorer": "https://sepolia.etherscan.io/tx/0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504"
+    }
+  ]
+}
