@@ -74,7 +74,7 @@ https://github.com/KaJota-inc/kajota-zama
 **Live demo (Vercel)**
 
 ```
-https://frontend-one-amber-5mpepeuye9.vercel.app
+https://kajota-confidential-pay.vercel.app
 ```
 
 **Live contract (Sepolia)**
