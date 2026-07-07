@@ -12,9 +12,9 @@ Submitted to the **Zama Developer Program — Mainnet Season 3** (Builder Track 
 
 **▶ https://kajota-confidential-pay.vercel.app** — connect a Sepolia wallet and try it.
 
-![KaJota Confidential Pay demo](docs/demo/kajota-confidential-pay-demo.gif)
+![KaJota Confidential Pay live demo](docs/demo/kajota-confidential-pay-live-demo.gif)
 
-*Walkthrough: the app, then Etherscan showing the confidential transfer & disperse — amounts are ciphertext on-chain (`Value: 0 ETH`, encrypted calldata).*
+*Live on Sepolia: connect → claim faucet → **decrypt balance = 10,000** → confidential transfer (2,500) → **re-decrypt = 7,500** → confidential disperse to 2 recipients. Every amount is encrypted client-side; the chain only ever sees ciphertext.*
 
 ## Live on Sepolia
 
