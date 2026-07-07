@@ -71,6 +71,12 @@ Built on @fhevm/solidity 0.11 with the FHEVM Hardhat plugin, and @zama-fhe/relay
 https://github.com/KaJota-inc/kajota-zama
 ```
 
+**Live demo (Vercel)**
+
+```
+https://frontend-one-amber-5mpepeuye9.vercel.app
+```
+
 **Live contract (Sepolia)**
 
 ```
