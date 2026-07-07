@@ -16,6 +16,10 @@ Submitted to the **Zama Developer Program — Mainnet Season 3** (Builder Track 
 
 *Live on Sepolia: connect → claim faucet → **decrypt balance = 10,000** → confidential transfer (2,500) → **re-decrypt = 7,500** → confidential disperse to 2 recipients. Every amount is encrypted client-side; the chain only ever sees ciphertext.*
 
+**The contract side** — 8/8 tests green, four real confidential transactions on Sepolia:
+
+![Contract tests + on-chain proofs](docs/demo/kajota-zama-terminal.gif)
+
 ## Live on Sepolia
 
 | | |
