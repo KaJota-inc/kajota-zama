@@ -1,0 +1,44 @@
+1
+00:00:00,000 --> 00:00:07,000
+KaJota Confidential Pay
+Confidential payments on Ethereum, powered by Zama FHEVM
+
+2
+00:00:07,000 --> 00:00:15,000
+Connect a Sepolia wallet
+
+3
+00:00:15,000 --> 00:00:23,000
+Claim faucet — an encrypted balance is seeded on-chain
+
+4
+00:00:23,000 --> 00:00:31,000
+Decrypt — only you can read it: 10,000
+
+5
+00:00:31,000 --> 00:00:39,000
+Send a confidential transfer — the amount is encrypted in your browser
+
+6
+00:00:39,000 --> 00:00:47,000
+Re-decrypt: 7,500 — it moved exactly 2,500, privately
+
+7
+00:00:47,000 --> 00:01:03,000
+Confidential disperse (TokenOps) — split a private balance across many recipients
+
+8
+00:01:03,000 --> 00:01:11,000
+Every amount stays encrypted — the chain sees only ciphertext
+
+9
+00:01:11,000 --> 00:01:20,000
+Disperse confirmed on-chain
+
+10
+00:01:20,000 --> 00:01:36,000
+8/8 tests green — encrypted transfer, overspend-clamp (no leak), owner-only ACL
+
+11
+00:01:36,000 --> 00:01:56,000
+Live on Sepolia — four real confidential transactions, verifiable on-chain
