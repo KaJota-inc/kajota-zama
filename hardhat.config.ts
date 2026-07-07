@@ -39,7 +39,7 @@ const MNEMONIC: string = resolveMnemonic();
 const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "");
 const SEPOLIA_RPC_URL: string = vars.get(
   "SEPOLIA_RPC_URL",
-  INFURA_API_KEY ? `https://sepolia.infura.io/v3/${INFURA_API_KEY}` : "https://ethereum-sepolia-rpc.publicnode.com",
+  INFURA_API_KEY ? `https://sepolia.infura.io/v3/${INFURA_API_KEY}` : "https://sepolia.drpc.org",
 );
 
 const config: HardhatUserConfig = {
