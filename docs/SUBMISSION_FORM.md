@@ -84,6 +84,7 @@ https://sepolia.etherscan.io/address/0xe4292f6aF1FA9668713269bE1643354a557BF342
 Deploy:                0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770
 Confidential faucet:   0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504
 Confidential transfer: 0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6
+Confidential disperse: 0x38c680f4b75ac46d423606417671555e235f203349d37053b0588e0fce98e541
 ```
 
 **Demo video**

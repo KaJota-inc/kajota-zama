@@ -31,6 +31,14 @@
       "to": "0xE45E6b01742CDB4e3aECFEb364b2967415C551c1",
       "recipientEncryptedBalanceHandle": "0x14f4a3578a61075c70c5f17bda688c0e42e157b18eff0000000000aa36a70500",
       "explorer": "https://sepolia.etherscan.io/tx/0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6"
+    },
+    {
+      "action": "confidentialDisperse — one tx splits a private balance across 2 recipients, each amount individually encrypted (TokenOps flow)",
+      "tx": "0x38c680f4b75ac46d423606417671555e235f203349d37053b0588e0fce98e541",
+      "block": 11222227,
+      "from": "0xC58A7717fdf1Bc40dFb63b02ab54D6CF6c8F7093",
+      "recipients": ["0x2F76906b39a484cC43Cf911ffd9893F52258E4C2", "0xe1baCF1F7c87F1dC03c401c8bD96CD48d3F13D4F"],
+      "explorer": "https://sepolia.etherscan.io/tx/0x38c680f4b75ac46d423606417671555e235f203349d37053b0588e0fce98e541"
     }
   ]
 }

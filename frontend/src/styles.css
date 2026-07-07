@@ -27,6 +27,9 @@ body {
   padding: 32px 20px 80px;
 }
 
+header {
+  text-align: center;
+}
 header h1 {
   font-size: 30px;
   margin: 0 0 6px;
@@ -36,7 +39,8 @@ header h1 {
 }
 .sub {
   color: var(--muted);
-  margin: 0 0 20px;
+  margin: 0 auto 20px;
+  max-width: 620px;
   line-height: 1.5;
 }
 
@@ -140,9 +144,15 @@ button:disabled {
   padding: 14px 22px;
   font-size: 16px;
 }
+.primary.big {
+  display: block;
+  margin: 16px auto 0;
+}
 
 .account {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
+  margin: 0 auto;
   align-items: center;
   gap: 8px;
   background: var(--panel);
