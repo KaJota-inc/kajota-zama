@@ -54,7 +54,7 @@ Client side, the relayer SDK produces the `externalEuint64` handle + input proof
 ## Links
 
 - **Repo:** https://github.com/KaJota-inc/kajota-zama
-- **Demo video:** _(3-min pitch — see `docs/DEMO.md` for the script)_
+- **Demo video:** https://youtu.be/csxzqPdgnzQ
 - **Contract:** https://sepolia.etherscan.io/address/0xe4292f6aF1FA9668713269bE1643354a557BF342
 
 ## Roadmap
