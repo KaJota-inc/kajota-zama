@@ -1,39 +1,55 @@
-# Voiceover script — KaJota Confidential Pay (≈ 3:00)
+# Voiceover script — synced to `kajota-zama-demo-full.mp4` (≈ 1:55)
 
-Read straight through at a calm pace (~140 wpm ≈ 420 words ≈ 3 min). Each block is
-timed and cued to a scene — works over the demo GIF (`docs/demo/`) or a live screen
-recording. Cues in *(italics)* are what's on screen, not read aloud.
+Read each line as its scene appears (the on-screen caption matches). There are multi-second
+holds between scenes, so you have room to breathe — don't rush. Total ≈ 290 words.
 
----
-
-**[0:00 – 0:22] — Hook** · *(app hero: "KaJota Confidential Pay")*
-
-> "Every payment you make on a normal blockchain is public. Anyone can see your balance, and the exact amount of every transfer you send. For a real business — payroll, supplier invoices, remittances — that's a dealbreaker. This is KaJota Confidential Pay: real payments on Ethereum, where the amounts stay private. It's built on Zama's FHEVM — fully homomorphic encryption, running on-chain."
-
-**[0:22 – 0:50] — What it is** · *(hero tagline / contract address in footer)*
-
-> "KaJota is an African fintech settling payments on-chain. The problem we're solving is simple: keep the public verifiability of a blockchain, but hide the numbers. With FHEVM, every balance is stored encrypted, and the contract computes directly on that ciphertext. The chain never sees a clear amount — not yours, not anyone's."
-
-**[0:50 – 1:30] — Encrypted balance + decrypt** · *(faucet claim → Decrypt → 7500)*
-
-> "Here's my account. On-chain, my balance is this — just ciphertext. To use the app, I claim a starting balance; that's a real transaction that runs encryption operations inside the smart contract. Now, to read my *own* balance, I sign a request. That authorizes Zama's key management network to decrypt the value for me, and only me. There it is — ten thousand. Nobody else can do that for my account."
-
-**[1:30 – 2:10] — Confidential transfer** · *(send → Etherscan: Value 0 ETH, encrypted input data)*
-
-> "Now a private payment. When I send, the amount is encrypted in my browser before it ever leaves — into a ciphertext plus a zero-knowledge proof. Look at the transaction on Etherscan: the value field is zero, and the amount in the calldata is an encrypted handle. It's not readable by anyone. And there's a subtle guarantee here — if I try to overspend, the contract moves exactly zero instead of failing. So even *whether* a payment succeeded tells an observer nothing about my balance."
-
-**[2:10 – 2:40] — TokenOps disperse** · *(disperse to 2 recipients → Etherscan)*
-
-> "The same primitive scales up. With confidential disperse, I split a private balance across many recipients in a single transaction — each amount individually encrypted. It's a confidential payout, or a private airdrop, with nothing leaked per recipient."
-
-**[2:40 – 3:00] — Proof + close** · *(Etherscan tx list / back to hero)*
-
-> "And this isn't a mock. It's deployed on Sepolia right now, with real confidential transactions you can verify on-chain — a deploy, an encrypted transfer, and a disperse. Confidential balances, confidential payments, confidential disperse — live, and powered by FHEVM. That's KaJota Confidential Pay."
+Cues in *(italics)* are what's on screen. The **[m:ss]** is when that scene starts.
 
 ---
 
-### Recording tips
-- Warm the WASM (one throwaway encrypt) before filming so the first decrypt is instant.
-- If doing a live take, be on **Sepolia** with two funded accounts; use a fresh account to film the faucet claim.
-- Keep the MetaMask signature popup on screen during the decrypt line — it sells "only you can read it."
-- Aim to land under 3:00 — the Zama Builder Track asks for a 3-minute pitch.
+**[0:00]** *(hero)*
+> "Every payment on a public blockchain is exposed — your balance, every amount, all of it. KaJota Confidential Pay changes that: private payments on Ethereum, powered by Zama's FHEVM."
+
+**[0:07]** *(connect wallet)*
+> "I connect a Sepolia wallet. From here, every balance and every amount lives on-chain — fully encrypted."
+
+**[0:15]** *(claim faucet)*
+> "First, I claim a starting balance. It's a real transaction, and it runs encryption right inside the smart contract."
+
+**[0:23]** *(decrypt → 10,000)*
+> "On-chain, my balance is just ciphertext. I sign once — and only I can decrypt it. Ten thousand."
+
+**[0:31]** *(confidential transfer)*
+> "Now a private transfer. The amount is encrypted in my browser before it ever leaves. The chain never sees the number."
+
+**[0:39]** *(re-decrypt → 7,500)*
+> "I decrypt again: seven thousand five hundred. It moved exactly two thousand five hundred — privately, and provably."
+
+**[0:47]** *(confidential disperse — TokenOps)*
+> "The same primitive scales up. Confidential disperse splits a private balance across many recipients in one transaction, each amount individually encrypted. This is our TokenOps flow — a confidential payout, or a private airdrop."
+
+**[1:03]** *(encrypted note)*
+> "Every amount stays encrypted, end to end. The chain only ever stores ciphertext."
+
+**[1:11]** *(disperse confirmed)*
+> "And it confirms on-chain like any other transaction — just without leaking a single number."
+
+**[1:20]** *(terminal — 8 passing)*
+> "Under the hood: eight of eight tests green. Encrypted transfers, an overspend that clamps to zero with no balance leak, and strict, owner-only decryption."
+
+**[1:36]** *(terminal — proofs table)*
+> "And it's live on Sepolia right now — a deploy, a confidential transfer, and a disperse, all verifiable on-chain. Confidential balances, confidential payments, confidential disperse. That's KaJota Confidential Pay."
+
+---
+
+## How to record (easiest path)
+
+1. **Open the video** so you can watch it play: `docs/demo/kajota-zama-demo-full.mp4` (or the captioned cut). Loop it once to get the rhythm.
+2. **Record just your voice** while watching — any of:
+   - macOS **Voice Memos** app (simplest), or
+   - **QuickTime → File → New Audio Recording**, or
+   - Any phone voice recorder.
+   Read the lines at the **[m:ss]** cues. Export as `.m4a`, `.wav`, or `.mp3`.
+3. **Send me the audio file path** (e.g. `~/Downloads/kajota-vo.m4a`) and I'll **mux it onto the video** with ffmpeg → a finished `.mp4` with your narration, ready to upload.
+
+Tips: record in a quiet room; leave ~1 s of silence at the very start; if you fumble a line, just pause and re-read it — I can trim. Prefer the **uncaptioned** cut if you don't want captions competing with your voice; the captioned cut is great if you want both.
