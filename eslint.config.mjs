@@ -16,8 +16,12 @@ export default tseslint.config(
       "cache/**",
       "coverage/**",
       "dist/**",
+      "**/dist/**",
       "node_modules/**",
+      "**/node_modules/**",
       "types/**",
+      "frontend/**",
+      "tokenops/**",
       "*.env",
       "*.log",
       "coverage.json",
@@ -27,7 +31,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   prettier,
   {
-    files: ["**/*.js"],
+    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -47,6 +51,7 @@ export default tseslint.config(
         { ignoreIIFE: true, ignoreVoid: true },
       ],
       "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "_", varsIgnorePattern: "_" },

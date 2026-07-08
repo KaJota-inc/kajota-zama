@@ -64,9 +64,7 @@ describe("ConfidentialPay", function () {
 
   it("faucet cannot be claimed twice", async function () {
     await (await contract.connect(signers.alice).claimFaucet()).wait();
-    await expect(contract.connect(signers.alice).claimFaucet()).to.be.revertedWith(
-      "ConfidentialPay: already claimed",
-    );
+    await expect(contract.connect(signers.alice).claimFaucet()).to.be.revertedWith("ConfidentialPay: already claimed");
   });
 
   it("confidentially transfers an encrypted amount", async function () {

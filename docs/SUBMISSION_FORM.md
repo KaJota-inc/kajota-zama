@@ -1,6 +1,7 @@
 # Paste-ready submission fields — Zama Developer Program S3
 
-Copy each block into the matching field on the Zama submission form. All fields are filled (demo video: https://youtu.be/pJaa-LLA-M4).
+Copy each block into the matching field on the Zama submission form. All fields are filled (demo video:
+https://youtu.be/pJaa-LLA-M4).
 
 ---
 
