@@ -11,7 +11,7 @@ Submitted to the **Zama Developer Program — Mainnet Season 3** (Builder Track 
 ## Live demo
 
 **▶ App:** https://kajota-confidential-pay.vercel.app — connect a Sepolia wallet and try it.
-**▶ Video walkthrough:** https://youtu.be/csxzqPdgnzQ
+**▶ Video walkthrough:** https://youtu.be/pJaa-LLA-M4
 
 ![KaJota Confidential Pay live demo](docs/demo/kajota-confidential-pay-live-demo.gif)
 

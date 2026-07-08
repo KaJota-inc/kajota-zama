@@ -1,6 +1,6 @@
 # Paste-ready submission fields — Zama Developer Program S3
 
-Copy each block into the matching field on the Zama submission form. Fill the one placeholder: **`<VIDEO_URL>`**.
+Copy each block into the matching field on the Zama submission form. All fields are filled (demo video: https://youtu.be/pJaa-LLA-M4).
 
 ---
 
@@ -96,7 +96,7 @@ Confidential disperse: 0x38c680f4b75ac46d423606417671555e235f203349d37053b0588e0
 **Demo video**
 
 ```
-https://youtu.be/csxzqPdgnzQ
+https://youtu.be/pJaa-LLA-M4
 ```
 
 ---
