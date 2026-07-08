@@ -6,5 +6,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   define: { global: "globalThis" },
-  optimizeDeps: { exclude: ["@zama-fhe/sdk", "@zama-fhe/react-sdk"] },
+  optimizeDeps: {
+    exclude: ["@zama-fhe/sdk", "@zama-fhe/react-sdk", "@zama-fhe/relayer-sdk"],
+  },
 });

@@ -1,18 +1,14 @@
 import { useMemo, useState } from "react";
 import type { Address } from "viem";
-import { isAddress } from "viem";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { isAddress, hexToBytes } from "viem";
+import { useAccount, useConnect, useDisconnect, useReadContract, useWriteContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { useQueryClient } from "@tanstack/react-query";
 import { useZamaSDK } from "@zama-fhe/react-sdk";
 import { useMintConfidential } from "@tokenops/sdk/testnet-faucet/react";
-import {
-  useIsRegistered,
-  useRegister,
-  usePreflightDisperse,
-  useDisperse,
-} from "@tokenops/sdk/fhe-disperse/react";
-import { CTTT, CTTT_DECIMALS } from "./config";
+import { useIsRegistered, useRegister, usePreflightDisperse, useDisperse } from "@tokenops/sdk/fhe-disperse/react";
+import { erc7984OperatorAbi, ERC7984_OPERATOR_MAX_DEADLINE } from "@tokenops/sdk/fhe-disperse";
+import { CTTT, CTTT_DECIMALS, DISPERSE_SINGLETON } from "./config";
 
 type Row = { recipient: string; amount: string };
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
@@ -38,6 +34,16 @@ export default function App() {
   // --- register (one-time per user) ---
   const { data: isRegistered } = useIsRegistered({ user: user! });
   const register = useRegister();
+  // ERC-7984 operator approval: the user must authorize the disperse singleton as an
+  // operator on their CTTT so it can pull tokens for a wallet-mode disperse.
+  const { data: isOperator, refetch: refetchOperator } = useReadContract({
+    address: CTTT,
+    abi: erc7984OperatorAbi,
+    functionName: "isOperator",
+    args: user ? [user, DISPERSE_SINGLETON] : undefined,
+    query: { enabled: !!user },
+  });
+  const { writeContractAsync, isPending: approving } = useWriteContract();
 
   // --- disperse ---
   const valid = rows.filter((r) => isAddress(r.recipient) && r.amount.trim() !== "");
@@ -50,9 +56,24 @@ export default function App() {
     amounts,
     mode: "wallet",
   });
-  // The relayer satisfies the Encryptor interface at runtime; its published type
-  // is slightly looser than useDisperse's param, so we cast (matches SDK README).
-  const disperse = useDisperse({ encryptor: (() => zamaSDK.relayer) as never });
+  // Adapter: the v3 @zama-fhe relayer returns `{ encryptedValues: hex[], inputProof: hex }`,
+  // but TokenOps' Encryptor expects `{ handles: Uint8Array[], inputProof: Uint8Array }`.
+  // We call the live relayer per-encryption and remap the result to bridge the shapes.
+  const encryptor = useMemo(
+    () => ({
+      async encrypt(params: { values: unknown[]; contractAddress: Address; userAddress: Address }) {
+        const relayer = zamaSDK.relayer as unknown as {
+          encrypt(p: unknown): Promise<{ handles?: unknown[]; encryptedValues?: unknown[]; inputProof: unknown }>;
+        };
+        const raw = await relayer.encrypt(params);
+        const toBytes = (h: unknown) => (typeof h === "string" ? hexToBytes(h as `0x${string}`) : (h as Uint8Array));
+        const src = (raw.handles ?? raw.encryptedValues ?? []) as unknown[];
+        return { handles: src.map(toBytes), inputProof: toBytes(raw.inputProof) };
+      },
+    }),
+    [zamaSDK],
+  );
+  const disperse = useDisperse({ encryptor: (() => encryptor) as never });
 
   const total = useMemo(() => valid.reduce((s, r) => s + parseFloat(r.amount || "0"), 0), [rows]);
 
@@ -132,6 +153,31 @@ export default function App() {
             >
               {isRegistered ? "Registered ✓" : register.isPending ? "Registering…" : "Register"}
             </button>
+            {isRegistered && isOperator === false && (
+              <button
+                className="primary"
+                style={{ marginLeft: 10 }}
+                disabled={approving}
+                onClick={async () => {
+                  try {
+                    await writeContractAsync({
+                      address: CTTT,
+                      abi: erc7984OperatorAbi,
+                      functionName: "setOperator",
+                      args: [DISPERSE_SINGLETON, Number(ERC7984_OPERATOR_MAX_DEADLINE)],
+                    });
+                    say("Approved the disperse singleton as CTTT operator.");
+                    await refetchOperator();
+                    invalidate();
+                  } catch (e) {
+                    say(`Approve failed: ${(e as Error).message}`);
+                  }
+                }}
+              >
+                {approving ? "Approving…" : "Approve CTTT for disperse"}
+              </button>
+            )}
+            {isRegistered && isOperator === true && <span className="ok"> · CTTT operator approved ✓</span>}
           </section>
 
           <section className="card">
@@ -183,7 +229,15 @@ export default function App() {
                       say(`Confidential disperse to ${valid.length} recipients confirmed.`);
                       invalidate();
                     },
-                    onError: (e) => say(`Disperse failed: ${(e as Error).message}`),
+                    onError: (e) => {
+                      const err = e as Error & { cause?: unknown };
+                      // Surface the real underlying cause for debugging.
+                      // eslint-disable-next-line no-console
+                      console.error("DISPERSE_ERROR", err, "CAUSE:", err.cause, "STACK:", err.stack);
+                      const cause = err.cause as (Error & { cause?: unknown }) | undefined;
+                      const deep = (cause?.cause as Error | undefined)?.message ?? cause?.message;
+                      say(`Disperse failed: ${err.message}${deep ? ` — ${deep}` : ""}`);
+                    },
                   },
                 )
               }
