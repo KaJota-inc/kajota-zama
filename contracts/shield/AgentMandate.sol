@@ -6,6 +6,11 @@ import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 import {IERC7984} from "@openzeppelin/confidential-contracts/interfaces/IERC7984.sol";
 import {FraudOracle} from "./FraudOracle.sol";
 
+/// @dev The Àjọ Confidential PoolTogether — an agent saves into it for its principal (the bridge).
+interface IConfidentialPool {
+    function creditDeposit(address beneficiary, euint64 amount) external;
+}
+
 /// @title  Kajota Shield — Agent Payment Mandate
 /// @notice A principal gives an autonomous agent a CONFIDENTIAL, bounded spending mandate: an
 ///         encrypted total cap, a merchant allow-list, a velocity limit, an expiry — and a kill
@@ -167,6 +172,51 @@ contract AgentMandate is ZamaEthereumConfig {
         asset.confidentialTransferFrom(m.principal, merchant, applied);
 
         emit Spend(msg.sender, merchant);
+    }
+
+    /// @notice The agent (msg.sender) SAVES `amount` into a confidential PoolTogether `pool` for its
+    ///         principal, under the mandate: clamped to the encrypted cap, the pool screened against
+    ///         the shared fraud oracle, then deposited — all over ciphertext. Over-budget, or a
+    ///         network-flagged pool, deposits exactly 0. This is the bridge that makes a Confidential
+    ///         PoolTogether agent-native: a treasury agent saves idle funds into a no-loss pool with
+    ///         no human per deposit, and cannot be hijacked past its mandate.
+    function depositToPool(
+        address pool,
+        externalEuint64 amount,
+        bytes calldata proof
+    ) external returns (euint64 applied) {
+        Mandate storage m = _m[msg.sender];
+        if (!m.active) revert Inactive();
+        if (m.paused) revert IsPaused();
+        if (block.timestamp >= m.expiry) revert Expired();
+        if (!merchantAllowed[msg.sender][pool]) revert MerchantNotAllowed(); // the pool is allow-listed
+
+        if (block.timestamp >= uint256(m.windowStart) + m.window) {
+            m.windowStart = uint32(block.timestamp);
+            m.countInWindow = 0;
+        }
+        if (uint256(m.countInWindow) + 1 > m.maxPerWindow) revert VelocityExceeded();
+        m.countInWindow += 1;
+
+        euint64 amt = FHE.fromExternal(amount, proof);
+        ebool within = FHE.le(FHE.add(m.spent, amt), m.cap);
+        ebool risky = oracle.riskFlag(merchantId(pool), riskThreshold); // is the POOL network-flagged?
+        applied = FHE.select(FHE.and(within, FHE.not(risky)), amt, FHE.asEuint64(0));
+        m.spent = FHE.add(m.spent, applied);
+        _lastApplied[msg.sender] = applied;
+        FHE.allowThis(m.spent);
+        FHE.allow(m.spent, m.principal);
+        FHE.allowThis(applied);
+        FHE.allow(applied, msg.sender);
+        FHE.allow(applied, m.principal);
+
+        // move the backing cUSDT into the pool, then credit the PRINCIPAL's pool position
+        FHE.allowTransient(applied, address(asset));
+        asset.confidentialTransferFrom(m.principal, pool, applied);
+        FHE.allowTransient(applied, pool);
+        IConfidentialPool(pool).creditDeposit(m.principal, applied);
+
+        emit Spend(msg.sender, pool);
     }
 
     // ── views ──────────────────────────────────────────────────────────────────────────────

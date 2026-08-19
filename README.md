@@ -2,12 +2,13 @@
 
 **Prize-linked savings, encrypted end-to-end. Deposit confidential cUSDT, keep your money, and each round one depositor wins the yield — where the winner is chosen *weighted by an encrypted deposit that never leaves ciphertext*, yet anyone on earth can re-derive the randomness and audit the draw.**
 
-**Àjọ is digital *esusu*.** In Yoruba, *àjọ* (also *esusu*, *ajo*) is the rotating-savings pool millions across West Africa run every week — you contribute, the pot rotates, nobody loses their principal. This is that tradition rebuilt as a no-loss prize pool on Zama's FHEVM: private balances, public fairness, no custodian.
+**Àjọ is digital *esusu* — and esusu was never just a savings pool.** In Yoruba, *àjọ* (also *esusu*, *ajo*) is the rotating-savings circle millions across West Africa run every week. It was always **two things bound together**: a pot that rotates fairly, *and* a **trust circle** — the group collectively remembers who's reliable and polices who isn't. Modern prize-savings (PoolTogether) kept the pot and threw away the circle; "trustless" code was meant to replace it, but the trust problem came back — as fraud, and in 2026 as *hijacked autonomous agents*. **Àjọ restores both halves — confidentially — because fully-homomorphic encryption finally lets the circle remember without anyone exposing their books.**
 
 - 🔒 **Confidential by construction** — deposits, balances, and winnings are `euint64` ciphertext on-chain. Not a privacy overlay; the state itself is encrypted.
-- 🎲 **Publicly verifiable winner selection over ciphertext** — a public commit-revealed seed drives a draw that runs entirely over encrypted balances. No on-chain decryption, no trusted operator scoring, no `ct×ct` multiply.
+- 🎲 **Publicly verifiable winner selection over ciphertext** — a public commit-revealed seed drives a draw that runs entirely over encrypted, *time-weighted* balances. No on-chain decryption, no trusted operator scoring, no `ct×ct` multiply.
 - 💸 **True no-loss** — principal is withdrawable any time; only the round's yield is at stake, and only the winner can decrypt their prize.
-- ✅ **No mocked data** — full deposit → commit → reveal → claim → withdraw lifecycle verified on Sepolia (tx table below), **16/16 tests passing**.
+- 🛡️ **The trust circle, restored — agent-native** — a **confidential mandate** governs who may put money in and how much. A human saver or an autonomous agent both act through the same primitive; a shared *encrypted* fraud memory screens bad counterparties; an anomaly monitor freezes a hijacked agent. No-loss is precisely why it's the safest DeFi action to delegate to an agent — so Àjọ is the pool agents can save into. (See *The trust circle* below.)
+- ✅ **No mocked data** — full lifecycle + the agent bridge verified on Sepolia (tx table below), **all tests passing**.
 
 > **Event:** Zama Developer Program — Mainnet Season 4, *Confidential PoolTogether* bounty (5,000 cUSDT, up to 3 winners; grand prize = **OpenZeppelin audit + production launch**). Built for production from line one.
 
@@ -71,6 +72,22 @@ flowchart LR
 4. **Reveal + draw** — `revealSeed(seed)` (hash must match) derives the encrypted `target`; `runDraw(count)` walks the encrypted prefix sum and flags the single winner — all over ciphertext.
 5. **Claim** — each depositor pulls a claim; `FHE.select` credits the jackpot to the winner's encrypted balance, everyone else an encrypted 0. Reveal your balance to see if you won.
 6. **Withdraw** — any time, `FHE.min(requested, balance)` clamps to available funds and moves cUSDT back out. Principal + any winnings, encrypted throughout.
+
+---
+
+## The trust circle, restored — agent-native
+
+The pot is only half of esusu. The other half — the circle that decides *who may put money in, how much, and whether a counterparty can be trusted* — is a set of contracts we call **Shield**, and the unifying primitive is a **confidential mandate**: a bounded, private authority over pooled money. A human saver's position and an autonomous agent's spend authority are the *same* primitive with different bounds.
+
+Why this belongs on a prize pool, and why now: **no-loss is the safest DeFi action to delegate to an agent** — you cannot lose principal. So as agents begin managing treasuries in 2026, a confidential no-loss pool is the ideal thing for an agent to save idle funds into — *if* it acts under guardrails. Àjọ provides them:
+
+- **`AgentMandate`** — a principal gives its agent an **encrypted spend cap**, a pool allow-list, a velocity limit, an expiry, and a **kill switch**. `depositToPool` clamps a save to the mandate over ciphertext — over-budget deposits exactly **0**, never reverting, never revealing the cap.
+- **`FraudOracle`** — the modern trust circle: vetted members contribute **encrypted** risk signals about counterparties (including *pools*). A query reveals only *"aggregate ≥ your threshold"* — never the score, never who reported. An agent **can't be tricked into saving to a malicious pool**.
+- **Anomaly monitor** — deterministic detection (velocity / new-counterparty burst) trips the on-chain kill switch when an agent is hijacked; only a human resumes.
+
+**The bridge** is one call — `agent.depositToPool(pool, amount)`: clamp to the encrypted mandate, screen the pool against the shared circle, then deposit the clamped amount into the confidential PoolTogether *for the principal*, all in one confidential transaction. The saver's position is the principal's; the agent merely acts, within bounds it cannot exceed.
+
+Shield is **deployed + verified on Sepolia** and **live-flow tested** (approved save → over-budget block → flagged-pool block → hijack → kill switch). Contracts: `contracts/shield/`; a premium operator console runs at [kajota-hub.onrender.com/shield](https://kajota-hub.onrender.com/shield).
 
 ---
 

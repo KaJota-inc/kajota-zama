@@ -47,6 +47,10 @@ contract ConfidentialPool is ZamaEthereumConfig, IERC7984Receiver, IERC165, Owna
     euint64 private _total;
     address[] private _participants;
     mapping(address => bool) public isParticipant;
+    /// @notice Authorised gateways (e.g. a Shield AgentMandate) that may deposit ON BEHALF OF a
+    ///         beneficiary — how an autonomous agent, under a confidential mandate, saves into the
+    ///         pool for its principal. The saver's position is the principal's, not the gateway's.
+    mapping(address => bool) public isDepositor;
 
     // ── TWAB accumulators ────────────────────────────────────────────────────────────────
     mapping(address => euint128) private _twabCum; // ∫ balance dt (balance-seconds)
@@ -111,6 +115,7 @@ contract ConfidentialPool is ZamaEthereumConfig, IERC7984Receiver, IERC165, Owna
     error DrawNotComplete();
     error AlreadyComplete();
     error ZeroWindow();
+    error NotDepositor();
 
     constructor(IERC7984 asset_) Ownable(msg.sender) {
         asset = asset_;
@@ -192,6 +197,23 @@ contract ConfidentialPool is ZamaEthereumConfig, IERC7984Receiver, IERC165, Owna
         FHE.allowThis(bal);
         FHE.allow(bal, user);
         FHE.allowThis(tot);
+    }
+
+    /// @notice Authorise (or revoke) a gateway that may deposit on a beneficiary's behalf.
+    function setDepositor(address gateway, bool allowed) external onlyOwner {
+        isDepositor[gateway] = allowed;
+    }
+
+    /// @notice Credit a deposit of encrypted `amount` to `beneficiary`, called by an authorised
+    ///         gateway (a Shield mandate) that has already moved the backing cUSDT into this pool.
+    ///         This is the bridge: an agent saves into the confidential pool for its principal,
+    ///         under a confidential mandate — the position belongs to the principal.
+    /// @dev    `amount` must be ACL-granted to this pool by the caller (FHE.allowTransient).
+    function creditDeposit(address beneficiary, euint64 amount) external {
+        if (!isDepositor[msg.sender]) revert NotDepositor();
+        if (phase != Phase.Open) revert WrongPhase();
+        _credit(beneficiary, amount);
+        emit Deposited(beneficiary);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════════════
