@@ -3,25 +3,26 @@ pragma solidity ^0.8.24;
 
 import {FHE, euint64, ebool, externalEuint64} from "@fhevm/solidity/lib/FHE.sol";
 import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {IERC7984} from "@openzeppelin/confidential-contracts/interfaces/IERC7984.sol";
 import {FraudOracle} from "./FraudOracle.sol";
 
 /// @title  Kajota Shield — Agent Payment Mandate
 /// @notice A principal gives an autonomous agent a CONFIDENTIAL, bounded spending mandate: an
 ///         encrypted total cap, a merchant allow-list, a velocity limit, an expiry — and a kill
 ///         switch. Every agent-initiated spend is, in one transaction, checked against the private
-///         mandate AND screened against the shared {FraudOracle}, entirely over ciphertext: a spend
-///         that is over-budget OR to a network-flagged counterparty is authorised for EXACTLY ZERO —
-///         it never reverts, and never reveals the budget. A hijacked or prompt-injected agent
-///         simply cannot move money outside its mandate.
+///         mandate AND screened against the shared {FraudOracle}, then EXECUTED as a confidential
+///         ERC-7984 transfer — all over ciphertext. A spend that is over-budget OR to a
+///         network-flagged counterparty moves EXACTLY ZERO: it never reverts, never reveals the
+///         budget, and a hijacked or prompt-injected agent simply cannot move money outside its
+///         mandate.
 /// @dev    The safety rails autonomous payments were missing in 2026: deterministic enforcement
-///         (fail-closed), a shared-but-private fraud signal, and a human kill switch — the object
-///         being protected (the agent payment) is the same across mandate (A) and oracle (B), and
-///         the confidential-compute engine is what makes both private.
+///         (fail-closed), a shared-but-private fraud signal, and a human kill switch. The mandate
+///         must be an ERC-7984 operator for the principal (principal calls `asset.setOperator`).
 contract AgentMandate is ZamaEthereumConfig {
     struct Mandate {
         address principal;
         euint64 cap; // encrypted total spend cap
-        euint64 spent; // encrypted running total actually authorised
+        euint64 spent; // encrypted running total actually spent
         uint48 expiry;
         uint32 window; // velocity window (seconds)
         uint32 maxPerWindow;
@@ -32,16 +33,17 @@ contract AgentMandate is ZamaEthereumConfig {
     }
 
     FraudOracle public immutable oracle;
+    IERC7984 public immutable asset; // confidential payment rail (cUSDT)
     uint64 public riskThreshold; // network risk score at/above which a counterparty is blocked
 
     mapping(address => Mandate) private _m; // agent => mandate
-    mapping(address => mapping(bytes32 => bool)) public merchantAllowed; // agent => merchant => ok
-    mapping(address => euint64) private _lastApplied; // most recent authorised amount (rail reads this)
+    mapping(address => mapping(address => bool)) public merchantAllowed; // agent => merchant => ok
+    mapping(address => euint64) private _lastApplied; // most recent amount actually moved
 
     event AgentRegistered(address indexed agent, address indexed principal, uint48 expiry);
-    event MerchantSet(address indexed agent, bytes32 indexed merchant, bool allowed);
+    event MerchantSet(address indexed agent, address indexed merchant, bool allowed);
     event Paused(address indexed agent, bool paused);
-    event Spend(address indexed agent, bytes32 indexed merchant); // amount is encrypted
+    event Spend(address indexed agent, address indexed merchant); // amount is encrypted
 
     error NotPrincipal();
     error Inactive();
@@ -50,9 +52,15 @@ contract AgentMandate is ZamaEthereumConfig {
     error MerchantNotAllowed();
     error VelocityExceeded();
 
-    constructor(FraudOracle oracle_, uint64 riskThreshold_) {
+    constructor(FraudOracle oracle_, IERC7984 asset_, uint64 riskThreshold_) {
         oracle = oracle_;
+        asset = asset_;
         riskThreshold = riskThreshold_;
+    }
+
+    /// @dev The oracle identifier for a counterparty address.
+    function merchantId(address merchant) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(merchant));
     }
 
     // ── principal controls ─────────────────────────────────────────────────────────────────
@@ -82,27 +90,28 @@ contract AgentMandate is ZamaEthereumConfig {
         emit AgentRegistered(agent, msg.sender, expiry);
     }
 
-    function setMerchant(address agent, bytes32 merchant, bool allowed) external {
+    function setMerchant(address agent, address merchant, bool allowed) external {
         if (_m[agent].principal != msg.sender) revert NotPrincipal();
         merchantAllowed[agent][merchant] = allowed;
         emit MerchantSet(agent, merchant, allowed);
     }
 
-    /// @notice Kill switch — the principal (or an off-chain anomaly monitor they authorise) can
-    ///         freeze the agent instantly.
+    /// @notice Kill switch — the principal (or an off-chain anomaly monitor they authorise) freezes
+    ///         the agent instantly.
     function setPaused(address agent, bool p) external {
         if (_m[agent].principal != msg.sender) revert NotPrincipal();
         _m[agent].paused = p;
         emit Paused(agent, p);
     }
 
-    // ── the guarded spend ──────────────────────────────────────────────────────────────────
-    /// @notice The agent (msg.sender) requests to spend `amount` at `merchant`. Returns the
-    ///         encrypted amount actually authorised: `amount` if within the mandate AND the merchant
-    ///         is not network-flagged, otherwise an encrypted 0. Plaintext guards (paused, expiry,
-    ///         allow-list, velocity) are public policy and revert; the amount check is confidential.
+    // ── the guarded, executed spend ────────────────────────────────────────────────────────
+    /// @notice The agent (msg.sender) pays `amount` to `merchant`. In one confidential transaction:
+    ///         checks the encrypted mandate, screens the shared fraud oracle, clamps the amount
+    ///         fail-closed, and moves the authorised amount as an ERC-7984 transfer from the
+    ///         principal to the merchant. Over-budget or network-flagged → moves exactly 0.
+    /// @return applied the encrypted amount actually paid.
     function checkAndSpend(
-        bytes32 merchant,
+        address merchant,
         externalEuint64 amount,
         bytes calldata proof
     ) external returns (euint64 applied) {
@@ -125,10 +134,10 @@ contract AgentMandate is ZamaEthereumConfig {
         // A · mandate: does this keep the agent within its encrypted cap?
         ebool within = FHE.le(FHE.add(m.spent, amt), m.cap);
         // B · oracle: is the counterparty below the network risk threshold?
-        ebool risky = oracle.riskFlag(merchant, riskThreshold);
+        ebool risky = oracle.riskFlag(merchantId(merchant), riskThreshold);
         ebool ok = FHE.and(within, FHE.not(risky));
 
-        // fail-closed clamp — over-budget or risky authorises exactly 0, no revert, no leak
+        // fail-closed clamp — over-budget or risky authorises exactly 0
         applied = FHE.select(ok, amt, FHE.asEuint64(0));
         m.spent = FHE.add(m.spent, applied);
         _lastApplied[msg.sender] = applied;
@@ -138,13 +147,12 @@ contract AgentMandate is ZamaEthereumConfig {
         FHE.allowThis(applied);
         FHE.allow(applied, msg.sender);
         FHE.allow(applied, m.principal);
-        emit Spend(msg.sender, merchant);
-    }
 
-    /// @notice The encrypted amount authorised by the most recent {checkAndSpend} for `agent` —
-    ///         what a confidential payment rail actually moves (0 if the last attempt was blocked).
-    function lastAppliedOf(address agent) external view returns (euint64) {
-        return _lastApplied[agent];
+        // execute the confidential payment: principal → merchant, exactly `applied`
+        FHE.allowTransient(applied, address(asset));
+        asset.confidentialTransferFrom(m.principal, merchant, applied);
+
+        emit Spend(msg.sender, merchant);
     }
 
     // ── views ──────────────────────────────────────────────────────────────────────────────
@@ -153,6 +161,9 @@ contract AgentMandate is ZamaEthereumConfig {
     }
     function capOf(address agent) external view returns (euint64) {
         return _m[agent].cap;
+    }
+    function lastAppliedOf(address agent) external view returns (euint64) {
+        return _lastApplied[agent];
     }
     function mandateMeta(
         address agent
