@@ -45,14 +45,16 @@ function Shell() {
               Connect Wallet
             </button>
           )}
-          <div className="toggle">
-            <button className={view === "classic" ? "on" : ""} onClick={() => setView("classic")}>
-              Classic
-            </button>
-            <button className={view === "game" ? "on" : ""} onClick={() => setView("game")}>
-              3D Game
-            </button>
-          </div>
+          {p.connected && (
+            <div className="toggle">
+              <button className={view === "classic" ? "on" : ""} onClick={() => setView("classic")}>
+                Classic
+              </button>
+              <button className={view === "game" ? "on" : ""} onClick={() => setView("game")}>
+                3D Game
+              </button>
+            </div>
+          )}
           <a className="link" href="#evidence">
             Evidence ↗
           </a>

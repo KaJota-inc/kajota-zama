@@ -163,6 +163,48 @@ export function usePool() {
       say(`✓ Public pool total: ${t === null ? "—" : fromUnits(t)} cUSDT.`);
     });
 
+  // ── Operator controls (owner only) — run a full draw in-app, no CLI ────────────────────
+  const seedKey = (rid: bigint) => `ajo-seed-${POOL_ADDRESS}-${rid.toString()}`;
+
+  const harvest = () =>
+    run("harvest", async () => {
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.harvestYield(toUnits(250), { gasLimit: 2_500_000n })).wait();
+      say("✓ Harvested 250 cUSDT of yield into the jackpot.");
+    });
+
+  const commit = () =>
+    run("commit", async () => {
+      const seed = ethers.hexlify(ethers.randomBytes(32));
+      localStorage.setItem(seedKey(roundId), seed);
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.commitRound(ethers.keccak256(seed), 3600n, { gasLimit: 600_000n })).wait();
+      say("✓ Committed a hidden seed — deposits frozen, draw armed.");
+    });
+
+  const reveal = () =>
+    run("reveal-seed", async () => {
+      const seed = localStorage.getItem(seedKey(roundId));
+      if (!seed) throw new Error("seed for this round not found in this browser");
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.revealSeed(seed, { gasLimit: 600_000n })).wait();
+      say("✓ Seed revealed — public randomness is now on-chain.");
+    });
+
+  const draw = () =>
+    run("draw", async () => {
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.runDraw(count > 0n ? count : 20n, { gasLimit: FHE_GAS })).wait();
+      say("✓ Draw run — the winner is flagged (encrypted). Claims are open.");
+    });
+
+  const close = () =>
+    run("close", async () => {
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.closeRound({ gasLimit: 400_000n })).wait();
+      say("✓ Round closed — deposits reopened.");
+    });
+
   const isOwner = !!owner && !!address && owner.toLowerCase() === address.toLowerCase();
 
   return {
@@ -187,6 +229,11 @@ export function usePool() {
     claim,
     withdraw,
     discloseTotal,
+    harvest,
+    commit,
+    reveal,
+    draw,
+    close,
     refresh,
   };
 }

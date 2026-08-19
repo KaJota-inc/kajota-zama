@@ -96,10 +96,29 @@ export function Classic({ p }: { p: PoolState }) {
           {p.isOwner && (
             <section className="card owner">
               <h2>Operator controls</h2>
-              <button className="ghost" disabled={!!p.busy} onClick={p.discloseTotal}>
-                Disclose public pool total
-              </button>
-              <p className="muted">Commit / reveal / draw a round via the CLI keeper script.</p>
+              <p className="hint">Run a full round in-app — harvest yield → commit → reveal → draw.</p>
+              <div className="row">
+                <button className="ghost" disabled={!!p.busy || p.phase !== 0} onClick={p.harvest}>
+                  {p.busy === "harvest" ? "…" : "1 · Harvest +250"}
+                </button>
+                <button className="ghost" disabled={!!p.busy || p.phase !== 0} onClick={p.commit}>
+                  {p.busy === "commit" ? "…" : "2 · Commit seed"}
+                </button>
+                <button className="ghost" disabled={!!p.busy || p.phase !== 1} onClick={p.reveal}>
+                  {p.busy === "reveal-seed" ? "…" : "3 · Reveal"}
+                </button>
+                <button className="ghost" disabled={!!p.busy || p.phase !== 2} onClick={p.draw}>
+                  {p.busy === "draw" ? "…" : "4 · Run draw"}
+                </button>
+                <button className="ghost" disabled={!!p.busy} onClick={p.close}>
+                  {p.busy === "close" ? "…" : "Close round"}
+                </button>
+              </div>
+              <div className="row">
+                <button className="ghost" disabled={!!p.busy} onClick={p.discloseTotal}>
+                  Disclose public total
+                </button>
+              </div>
             </section>
           )}
         </>

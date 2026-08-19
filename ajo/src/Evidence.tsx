@@ -103,7 +103,73 @@ export function Evidence() {
         </ol>
       </section>
 
+      <DrawVerifier />
+
       <footer>Àjọ · Confidential PoolTogether · Zama Developer Program — Season 4</footer>
     </div>
+  );
+}
+
+// Anyone can recompute the draw's public randomness from (roundId, seed) — the whole point
+// of "publicly verifiable". Paste the round and the revealed seed (from the revealSeed tx).
+function DrawVerifier() {
+  const [round, setRound] = useState("0");
+  const [seed, setSeed] = useState("");
+  const [out, setOut] = useState<{ commitment: string; r: string } | null>(null);
+  const [err, setErr] = useState("");
+
+  const compute = () => {
+    setErr("");
+    setOut(null);
+    try {
+      const s = seed.trim();
+      if (!/^0x[0-9a-fA-F]{64}$/.test(s)) throw new Error("seed must be a 32-byte hex value (0x…64 hex chars)");
+      const commitment = ethers.keccak256(s); // must equal the on-chain seedCommitment
+      const full = BigInt(ethers.keccak256(ethers.solidityPacked(["uint256", "bytes32"], [BigInt(round), s])));
+      const r = full & ((1n << 64n) - 1n); // uint64(uint256(keccak(roundId, seed)))
+      setOut({ commitment, r: r.toString() });
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+  };
+
+  return (
+    <section className="card">
+      <h2>Verify a draw yourself</h2>
+      <p className="hint">
+        The draw's randomness is public. Paste a round and its revealed seed; recompute the commitment and the winning
+        ticket's random `r` — the same values the contract used. No trust required.
+      </p>
+      <div className="row">
+        <input style={{ width: 80 }} value={round} onChange={(e) => setRound(e.target.value)} placeholder="round" />
+        <input
+          style={{ width: 320, maxWidth: "100%" }}
+          value={seed}
+          onChange={(e) => setSeed(e.target.value)}
+          placeholder="revealed seed 0x…"
+        />
+        <button className="primary" onClick={compute}>
+          Recompute
+        </button>
+      </div>
+      {err && <p className="muted" style={{ color: "var(--warn)" }}>{err}</p>}
+      {out && (
+        <div style={{ marginTop: 10, fontFamily: "ui-monospace, monospace", fontSize: 13 }}>
+          <div className="evrow">
+            <span>commitment = keccak256(seed)</span>
+            <code>{out.commitment.slice(0, 14)}…{out.commitment.slice(-8)}</code>
+          </div>
+          <div className="evrow">
+            <span>public r = uint64(keccak256(roundId, seed))</span>
+            <code>{out.r}</code>
+          </div>
+          <p className="muted" style={{ marginTop: 8 }}>
+            The contract derives the winning ticket <code>target = (r · drawTotal) / 2^64</code> from this exact{" "}
+            <code>r</code>, then finds the one encrypted balance interval containing it — over ciphertext, no decryption.
+            Check <code>commitment</code> against the pool's <code>seedCommitment</code> to confirm the seed wasn't swapped.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
