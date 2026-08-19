@@ -316,9 +316,16 @@
       ? '<span class="badge flag">⚠ flagged</span>'
       : '<span class="badge clean">clean</span>'}</div>`)
     .join("");
+  const es = (a) => `https://sepolia.etherscan.io/address/${a}#code`;
+  const tx = (h) => `https://sepolia.etherscan.io/tx/${h}`;
+  const L = (href, t) => `<a href="${href}" target="_blank" rel="noreferrer" style="color:var(--gold);text-decoration:none;border-bottom:1px solid color-mix(in oklab,var(--gold) 35%,transparent)">${t}</a>`;
   $("foot").innerHTML =
-    `Mandate ${short(RUN.contracts.AgentMandate)} · Oracle ${short(RUN.contracts.FraudOracle)} · cUSDT ${short(RUN.contracts.ConfidentialUSDT)}<br>` +
-    `Kajota Shield · real FHE, local run · ${RUN.timeline.length} decisions`;
+    `Live &amp; verified on Sepolia — ` +
+    `Mandate ${L(es("0x3FF6A6cBF7429Da3572Ff858b2d677Bd8EdCCE6E"), "0x3FF6…CE6E")} · ` +
+    `Oracle ${L(es("0x14C93328e19e602Fd6d63bcC90053eB8b7537BAc"), "0x14C9…7BAc")} · ` +
+    `cUSDT ${L(es("0x6Be1122CE0e08DBD847f0C02cfc6188246F790B8"), "0x6Be1…90B8")}<br>` +
+    `Real FHE on-chain — ${L(tx("0x10a066f1a34472416d8e4797ad0a91046692b3fadee25bd2eb9d403aac270627"), "an approved payment")} + ` +
+    `${L(tx("0x09b5c60c498ac297da7dd8f5ab5b651952a364a5d54eab2ef6aac73d158331c2"), "a blocked one")}`;
 
   const feed = $("feed");
   let timers = [];
