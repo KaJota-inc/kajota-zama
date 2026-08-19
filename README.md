@@ -95,22 +95,26 @@ Shield is **deployed + verified on Sepolia** and **live-flow tested** (approved 
 
 | Contract | Role | Address |
 |---|---|---|
-| **ConfidentialUSDT** (cUSDT) | ERC-7984 confidential-token rail | [`0x3513B7f708D512b5196035D5Aef610e0910dA97B`](https://sepolia.etherscan.io/address/0x3513B7f708D512b5196035D5Aef610e0910dA97B) |
-| **ConfidentialPool** (Àjọ) | No-loss prize pool + single-winner encrypted draw | [`0x760FBfAdAd6576bd93c4bf3cBBc4718B07EA1739`](https://sepolia.etherscan.io/address/0x760FBfAdAd6576bd93c4bf3cBBc4718B07EA1739) |
+| **ConfidentialPool** (Àjọ) | No-loss prize pool · time-weighted single-winner draw · agent bridge | [`0x885843C8110aEe5eFe3c69810ef89790AB74767A`](https://sepolia.etherscan.io/address/0x885843C8110aEe5eFe3c69810ef89790AB74767A#code) |
+| **ConfidentialUSDT** (cUSDT) | ERC-7984 confidential-token rail | [`0x6Be1122CE0e08DBD847f0C02cfc6188246F790B8`](https://sepolia.etherscan.io/address/0x6Be1122CE0e08DBD847f0C02cfc6188246F790B8#code) |
+| **AgentMandate** (Shield) | Confidential per-agent mandate + guarded `depositToPool` | [`0x5BA600798E834E12b48648488C7eb12d92e0a32c`](https://sepolia.etherscan.io/address/0x5BA600798E834E12b48648488C7eb12d92e0a32c#code) |
+| **FraudOracle** (Shield) | Privacy-preserving shared fraud memory | [`0x14C93328e19e602Fd6d63bcC90053eB8b7537BAc`](https://sepolia.etherscan.io/address/0x14C93328e19e602Fd6d63bcC90053eB8b7537BAc#code) |
 
 ## On-chain proof set (real Sepolia txs — no mocked data)
 
 | # | Step | Tx |
 |---|---|---|
-| 1 | faucet cUSDT | [`0xb071c1c8…b041ff34`](https://sepolia.etherscan.io/tx/0xb071c1c8c464e32d12344b3c258ebac812ab8f5692440e44acc1a43ab041ff34) |
-| 2 | deposit — `confidentialTransferAndCall` | [`0xb478fab1…110e7eeb`](https://sepolia.etherscan.io/tx/0xb478fab1ae61d42cac78b5028e20d3768493f2f299437d245cff27fa110e7eeb) |
-| 3 | harvestYield — fund jackpot from yield | [`0x1f3f4fa4…21bd09f1`](https://sepolia.etherscan.io/tx/0x1f3f4fa4a7f0513e9cb3942327cfa769baefb23a01a6921e08dbe87a21bd09f1) |
-| 4 | commitRound | [`0xacb04cef…485300889`](https://sepolia.etherscan.io/tx/0xacb04cef49b167970ff9d71edffb40f2fcfd3c269c959e339e0ebbf485300889) |
-| 5 | revealSeed | [`0xb2efcdd0…be69e4ac`](https://sepolia.etherscan.io/tx/0xb2efcdd00b81b9b8fa2f15c4c84da65e96ce79d921a73783e19ffb87be69e4ac) |
-| 6 | runDraw — encrypted cumulative single-winner | [`0x6b51d6e4…d4234cf0`](https://sepolia.etherscan.io/tx/0x6b51d6e46140b9a29199a81acf261f2f49ebfa6788e51d512b089801d4234cf0) |
-| 7 | claim — winner payout | [`0x64d17390…82f228b63`](https://sepolia.etherscan.io/tx/0x64d173901a8197e229e3081807c8c320c64e5dd6d0724317113022b82f228b63) |
-| 8 | disclosePublicTotal | [`0x51534320…39d1d411`](https://sepolia.etherscan.io/tx/0x51534320a8bb7265e3b89148eb3c51b2eb263c24180bdfe724ed4f0939d1d411) |
-| 9 | withdraw (principal + jackpot) | [`0x2e84729c…a1d31c37`](https://sepolia.etherscan.io/tx/0x2e84729c28f32af338eaf2bf3b7bb059573a3ed55f2253f4aa2dd09fa1d31c37) |
+| 1 | faucet cUSDT | [`0x3ec52a52…9e2da6c9`](https://sepolia.etherscan.io/tx/0x3ec52a52e3af1703ca24dfa188a03f99b334d157109622d580ec86209e2da6c9) |
+| 2 | deposit — `confidentialTransferAndCall` | [`0xefcd6431…c6869d5c`](https://sepolia.etherscan.io/tx/0xefcd6431460e548bc68f969339af1ab305c41976dce8202a6876c220c6869d5c) |
+| 3 | harvestYield — fund jackpot from yield | [`0xe269f4dd…7c8604ec`](https://sepolia.etherscan.io/tx/0xe269f4dd9d945035c0633eb0c42e3f2279bcdae68200e07efb9cf9117c8604ec) |
+| 4 | commitRound | [`0x9ced5f58…601886b1`](https://sepolia.etherscan.io/tx/0x9ced5f58028be9e7383e6c56031a829da9057669cd3d509ea3c58bac601886b1) |
+| 5 | revealSeed | [`0xb852e6d4…279ade31d`](https://sepolia.etherscan.io/tx/0xb852e6d4ed39a46c2ac66073ef27ed6bd8facdc9f087a75443e795d279ade31d) |
+| 6 | **tallyDraw — time-weighted odds** | [`0x2e8d5661…3e2fe20c`](https://sepolia.etherscan.io/tx/0x2e8d566129e317ebd61e7bd8ef3a205cd671b6ae9b831c68380a085e3e2fe20c) |
+| 7 | runDraw — encrypted single-winner | [`0xd4d7ea60…b19adf40`](https://sepolia.etherscan.io/tx/0xd4d7ea604878136301228ad6a25299d6e4dc28dfd4565bcb205bfd18b19adf40) |
+| 8 | claim — winner payout | [`0x42505e28…b867c9b8d`](https://sepolia.etherscan.io/tx/0x42505e287af995a9534fc4a2dc451a99b2bde0a7e14e86e67f75044b867c9b8d) |
+| 9 | disclosePublicTotal | [`0x2f35aec4…c0df1bda3`](https://sepolia.etherscan.io/tx/0x2f35aec4f68935d35ff918086c97b6d983359af1bc779ea27e108b4c0df1bda3) |
+| 10 | withdraw (principal + jackpot) | [`0x6b524077…55f11092a`](https://sepolia.etherscan.io/tx/0x6b5240775f662818df35a188479b7aa69eb619298223f949f024bce55f11092a) |
+| 🛡️ | **agent saves into the pool (Shield bridge)** | [`0xa8482b7c…434738bc`](https://sepolia.etherscan.io/tx/0xa8482b7c458b276645dfd5fded8be505970ce1cc957bb1d5f63490f0434738bc) |
 
 **Live demo:** https://ajo-confidential.vercel.app · **No-login evidence page:** https://ajo-confidential.vercel.app/#evidence · **Demo video:** _(recording — link added on publish)_
 
@@ -120,7 +124,7 @@ Shield is **deployed + verified on Sepolia** and **live-flow tested** (approved 
 
 | # | Constraint | Solution |
 |---|---|---|
-| 1 | **Verifiable *yet* encrypted single-winner selection** | Public seed → encrypted `target = (r·drawTotal)/2^64`; a paginated walk over the encrypted prefix sum flags the one interval containing `target`. Exactly one winner, weighted by deposit, entirely over ciphertext with public randomness — anyone audits the draw with **no decryption**. |
+| 1 | **Verifiable *yet* encrypted, time-weighted single-winner selection** | Odds use each account's **time-weighted average balance (TWAB)** — a whale can't snipe a round by depositing right before it. A public seed → an encrypted `target`; a paginated walk over the encrypted prefix sum of the time-weights flags the one interval containing it. Exactly one winner, entirely over ciphertext with public randomness — anyone audits the draw with **no decryption**. |
 | 2 | **Overflow-safe FHE fixed-point** | `p·total` and `2^64·balance` reach `2^128`; a naive `euint64` scalar-multiply silently wraps. Cast `euint64 → euint128` *before* the multiply so both products are exact, then one `FHE.lt`. |
 | 3 | **Withdraw-any-time over encrypted principal** | `FHE.min(requested, balance)` clamps an over-withdraw to exactly the balance — never reverts, and never leaks whether you had enough (a revert would be a decryption oracle). |
 | 4 | **ERC-7984 deposit callback ACL** | The `onConfidentialTransferReceived` return `ebool` must be **both** `FHE.allowThis`'d (receiver-side check) **and** `FHE.allowTransient`'d to the token (it's consumed in the token's refund `FHE.select`) — miss either and `transferAndCall` reverts. |
