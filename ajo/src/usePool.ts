@@ -1,0 +1,194 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ethers } from "ethers";
+import { getFhevmInstance, encryptAmount, userDecryptBalance, publicDecrypt } from "./fhevm";
+import { CUSDT_ABI, POOL_ABI } from "./abi";
+import { POOL_ADDRESS, CUSDT_ADDRESS, SEPOLIA_CHAIN_ID, CUSDT_DECIMALS, PUBLIC_RPC } from "./config";
+
+const UNIT = 10 ** CUSDT_DECIMALS;
+export const toUnits = (v: number) => BigInt(Math.round(v * UNIT));
+export const fromUnits = (v: bigint) => Number(v) / UNIT;
+export const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
+const FHE_GAS = 6_000_000n;
+
+type Eip1193 = ethers.Eip1193Provider & { on?: (e: string, cb: (...a: unknown[]) => void) => void };
+
+/// Shared wallet + contract state and actions for Àjọ. Both the classic dApp view and the
+/// 3D game view consume this, so they never drift.
+export function usePool() {
+  const [address, setAddress] = useState<string>();
+  const [chainOk, setChainOk] = useState(true);
+  const [signer, setSigner] = useState<ethers.Signer>();
+  const [busy, setBusy] = useState<string>();
+  const [log, setLog] = useState<string[]>([]);
+
+  const [phase, setPhase] = useState(0);
+  const [roundId, setRoundId] = useState(0n);
+  const [jackpot, setJackpot] = useState(0n);
+  const [count, setCount] = useState(0n);
+  const [owner, setOwner] = useState<string>();
+  const [publicTotal, setPublicTotal] = useState<bigint | null>(null);
+  const [myBalance, setMyBalance] = useState<bigint | null>(null);
+  const [lastWin, setLastWin] = useState<boolean | null>(null);
+
+  const say = (m: string) => setLog((l) => [`${new Date().toLocaleTimeString()}  ${m}`, ...l].slice(0, 40));
+
+  const provider = useMemo(() => {
+    const eth = (window as unknown as { ethereum?: Eip1193 }).ethereum;
+    return eth ? new ethers.BrowserProvider(eth) : null;
+  }, []);
+  const readProvider = useMemo(() => provider ?? new ethers.JsonRpcProvider(PUBLIC_RPC), [provider]);
+
+  const refresh = useCallback(async () => {
+    const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, readProvider);
+    try {
+      const [ph, rid, jp, ct, ow] = await Promise.all([
+        pool.phase(),
+        pool.roundId(),
+        pool.jackpot(),
+        pool.participantsCount(),
+        pool.owner(),
+      ]);
+      setPhase(Number(ph));
+      setRoundId(rid);
+      setJackpot(jp);
+      setCount(ct);
+      setOwner(ow);
+    } catch {
+      /* rpc hiccup */
+    }
+  }, [readProvider]);
+
+  useEffect(() => {
+    void refresh();
+    const t = setInterval(refresh, 12_000);
+    return () => clearInterval(t);
+  }, [refresh]);
+
+  const connect = async () => {
+    if (!provider) return say("No wallet found — install MetaMask.");
+    const eth = (window as unknown as { ethereum?: Eip1193 }).ethereum!;
+    await eth.request({ method: "eth_requestAccounts" });
+    const net = await provider.getNetwork();
+    if (Number(net.chainId) !== SEPOLIA_CHAIN_ID) {
+      setChainOk(false);
+      try {
+        await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xaa36a7" }] });
+      } catch {
+        return say("Switch MetaMask to Sepolia.");
+      }
+    }
+    setChainOk(true);
+    const s = await provider.getSigner();
+    setSigner(s);
+    setAddress(await s.getAddress());
+    say("Wallet connected.");
+    void refresh();
+  };
+
+  const run = async (label: string, fn: () => Promise<void>) => {
+    try {
+      setBusy(label);
+      await fn();
+    } catch (e) {
+      say(`✗ ${label}: ${(e as Error).message.slice(0, 140)}`);
+    } finally {
+      setBusy(undefined);
+      void refresh();
+    }
+  };
+
+  const faucet = () =>
+    run("faucet", async () => {
+      const c = new ethers.Contract(CUSDT_ADDRESS, CUSDT_ABI, signer);
+      const tx = await c.faucet(toUnits(1000), { gasLimit: 2_000_000n });
+      say(`Faucet ${short(tx.hash)} …`);
+      await tx.wait();
+      say("✓ Minted 1,000 cUSDT.");
+    });
+
+  const deposit = (amount: number) =>
+    run("deposit", async () => {
+      const inst = await getFhevmInstance();
+      const { handle, proof } = await encryptAmount(inst, CUSDT_ADDRESS, address!, toUnits(amount));
+      const c = new ethers.Contract(CUSDT_ADDRESS, CUSDT_ABI, signer);
+      const tx = await c["confidentialTransferAndCall(address,bytes32,bytes,bytes)"](
+        POOL_ADDRESS,
+        handle,
+        proof,
+        "0x",
+        { gasLimit: FHE_GAS },
+      );
+      say(`Deposit ${short(tx.hash)} … (encrypted)`);
+      await tx.wait();
+      say(`✓ Deposited ${amount} cUSDT (encrypted).`);
+    });
+
+  const revealBalance = () =>
+    run("reveal", async () => {
+      const inst = await getFhevmInstance();
+      const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, provider);
+      const clear = await userDecryptBalance(inst, signer!, POOL_ADDRESS, await pool.balanceOf(address));
+      setMyBalance(clear);
+      say(`✓ Your balance: ${fromUnits(clear)} cUSDT (decrypted for you only).`);
+    });
+
+  const claim = () =>
+    run("claim", async () => {
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const tx = await c.claim({ gasLimit: FHE_GAS });
+      say(`Claim ${short(tx.hash)} … (winner payout)`);
+      await tx.wait();
+      say("✓ Claim settled — reveal your balance to see if you won.");
+    });
+
+  const withdraw = (amount: number) =>
+    run("withdraw", async () => {
+      const inst = await getFhevmInstance();
+      const { handle, proof } = await encryptAmount(inst, POOL_ADDRESS, address!, toUnits(amount));
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const tx = await c.withdraw(handle, proof, { gasLimit: FHE_GAS });
+      say(`Withdraw ${short(tx.hash)} …`);
+      await tx.wait();
+      say(`✓ Withdrew up to ${amount} cUSDT (clamped to your balance).`);
+    });
+
+  const discloseTotal = () =>
+    run("disclose", async () => {
+      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      await (await c.disclosePublicTotal({ gasLimit: 500_000n })).wait();
+      const inst = await getFhevmInstance();
+      const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, provider);
+      const t = await publicDecrypt(inst, await pool.totalPooled());
+      setPublicTotal(t);
+      say(`✓ Public pool total: ${t === null ? "—" : fromUnits(t)} cUSDT.`);
+    });
+
+  const isOwner = !!owner && !!address && owner.toLowerCase() === address.toLowerCase();
+
+  return {
+    address,
+    chainOk,
+    connected: !!address,
+    phase,
+    roundId,
+    jackpot,
+    count,
+    isOwner,
+    publicTotal,
+    myBalance,
+    lastWin,
+    setLastWin,
+    busy,
+    log,
+    connect,
+    faucet,
+    deposit,
+    revealBalance,
+    claim,
+    withdraw,
+    discloseTotal,
+    refresh,
+  };
+}
+
+export type PoolState = ReturnType<typeof usePool>;

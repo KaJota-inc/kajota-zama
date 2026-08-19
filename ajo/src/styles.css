@@ -25,6 +25,110 @@ body {
   margin: 0 auto;
   padding: 40px 20px 80px;
 }
+.wrap.wide {
+  max-width: 1100px;
+}
+
+/* view toggle */
+.toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--card);
+}
+.toggle button {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 0;
+}
+.toggle button.on {
+  background: var(--accent);
+  color: #1a1400;
+}
+
+/* 3D game mode */
+.game {
+  position: relative;
+  height: 66vh;
+  min-height: 460px;
+  margin: 20px 0;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  background: radial-gradient(700px 400px at 50% 30%, #14161f 0%, #06070b 80%);
+}
+.game canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px;
+}
+.hud-status {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--muted);
+  background: rgba(10, 11, 15, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  align-self: flex-start;
+  backdrop-filter: blur(6px);
+}
+.hud-status b {
+  color: var(--ink);
+}
+.hud-actions {
+  pointer-events: auto;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+button.gold {
+  background: linear-gradient(180deg, #fff0c2, var(--accent));
+  color: #1a1400;
+  box-shadow: 0 0 24px rgba(245, 197, 66, 0.45);
+}
+.winner-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 11, 15, 0.8);
+  border: 1px solid var(--accent);
+  color: var(--accent2);
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-align: center;
+  max-width: 80%;
+  backdrop-filter: blur(6px);
+}
+.hud-log {
+  pointer-events: none;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: #c3c7d2;
+  background: rgba(10, 11, 15, 0.55);
+  border-radius: 8px;
+  padding: 6px 12px;
+  align-self: center;
+}
 
 header {
   text-align: center;
