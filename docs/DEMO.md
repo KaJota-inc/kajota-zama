@@ -1,68 +1,63 @@
-# 3-Minute Demo Script — KaJota Confidential Pay
+# Àjọ — Demo video beat-sheet & script
 
-Target: **≤ 3:00**. Record at 1080p. Have MetaMask on **Sepolia** with two accounts (Alice, Bob), both with a little
-test ETH. Frontend running (`cd frontend && npm run dev`). Etherscan open on the contract in a second tab.
+**Target: ≤ 2:50 (hard cap 3:00). Hook in the first 10 seconds.** Real voice only — Zama disqualifies AI-generated voice. Record the screen and your narration; sync afterward.
 
----
-
-### 0:00 – 0:25 · The problem (talking head or slide)
-
-> "This is KaJota Confidential Pay. On a normal ERC-20, every balance and every payment amount is public — anyone can
-> see exactly what a merchant holds and what they send. For real payments — payroll, remittances, supplier invoices —
-> that's a dealbreaker. We fixed it with Zama's FHEVM: the amounts are encrypted on-chain, end to end, while the chain
-> stays publicly verifiable."
-
-### 0:25 – 0:45 · Show the ciphertext on-chain
-
-- Switch to the Etherscan tab on `0xe4292f6a…F342`.
-  > "Here's the live contract on Sepolia. Balances are stored as encrypted `euint64` handles — this blob is an account's
-  > balance. It's ciphertext. No amount is readable here, by anyone."
-
-### 0:45 – 1:15 · Faucet → encrypted balance
-
-- In the app, **Connect Wallet** (Alice). Point at the balance card.
-  > "I connect as Alice. Her on-chain balance is this ciphertext handle. I click **Claim faucet** — that's a real
-  > Sepolia transaction that runs FHE operations _inside_ the contract to seed an encrypted balance."
-- Click **Claim faucet**, wait for confirmation (activity log shows the tx).
-
-### 1:15 – 1:40 · User-decryption (only you can read it)
-
-- Click **Decrypt my balance**. MetaMask pops an EIP-712 signature.
-  > "To read her _own_ balance, Alice signs an EIP-712 request. That authorizes Zama's KMS to return the clear value —
-  > to her, and only her. There it is: 10,000. Nobody else can do this for her account."
-- Show `🔒 hidden` flipping to `10000`.
-
-### 1:40 – 2:20 · Confidential transfer (the amount never leaks)
-
-> "Now a private payment. I send Bob some amount — it's encrypted in my browser before it ever leaves, producing a
-> ciphertext plus a zero-knowledge input proof."
-
-- Enter Bob's address + an amount, click **Send privately**. Show the tx in the log.
-- Flip to Etherscan on that tx.
-  > "On-chain, the transfer input is ciphertext — the amount is nowhere in the transaction. And a subtle but important
-  > property: if I try to overspend, the contract moves _zero_ instead of reverting — so even _whether_ a transfer
-  > succeeded tells an observer nothing about my balance."
-
-### 2:20 – 2:50 · TokenOps: confidential disperse
-
-> "Same primitive, scaled up: a confidential disperse. I split a private balance across several recipients in one
-> transaction — each amount individually encrypted. This is our TokenOps track entry: a confidential airdrop / payout
-> flow."
-
-- Add two recipients + amounts, click **Disperse privately**. Show confirmation.
-
-### 2:50 – 3:00 · Close
-
-> "Confidential balances, confidential transfers, confidential disperse — live on Sepolia, powered by FHEVM. That's
-> KaJota Confidential Pay."
+App: https://ajo-confidential.vercel.app · Evidence: https://ajo-confidential.vercel.app/#evidence
 
 ---
 
-## Shot list / checklist
+## Before you record (staging — do once)
 
-- [ ] Etherscan tab pre-opened on the contract address
-- [ ] Two Sepolia accounts funded with test ETH
-- [ ] `frontend/.env` has `VITE_CONTRACT_ADDRESS=0xe4292f6aF1FA9668713269bE1643354a557BF342`
-- [ ] Do a dry-run claim on a throwaway account first (faucet is one-time per account)
-- [ ] Keep MetaMask popups on-screen when signing (shows the EIP-712 / tx clearly)
-- [ ] Mention "Sepolia" and "FHEVM" out loud (judging cue)
+1. **MetaMask on Sepolia**, funded with a little test ETH. Use a fresh account so the faucet/deposit beats look clean.
+2. **Warm the WASM**: load the app, connect, and do one throwaway "Reveal my balance" so the ~5 MB FHE WASM is cached — otherwise the first encrypt in your take stalls ~10 s.
+3. The app should be in **Phase: Open** (it is now, round #1). You'll deposit live, then run the keeper step below to open the draw.
+4. Keep a terminal ready for the one operator step:
+   ```bash
+   node scripts/stage-round.mjs 250      # funds a 250 cUSDT prize, commits + reveals
+   ```
+   Run this **after** you film the deposit (Beat 4). As the sole depositor you always win, so the claim beat lands every take.
+
+---
+
+## Beat sheet
+
+| # | ~Time | On screen | Narration (say this) |
+|---|---|---|---|
+| 1 | 0:00–0:12 | Landing page. Cursor rests on **Pool total 🔒 encrypted** and **Prize**. | "This is a savings lottery where I can prove the pool is real and the draw is fair — but I can't see anyone's balance, and nobody can see mine. Every figure here lives encrypted, on-chain." |
+| 2 | 0:12–0:34 | Slowly highlight the tagline ("Digital *esusu*"). | "Where I'm from in Nigeria we call this *esusu* — everyone pays into a pot, nobody loses their money, and each round someone wins. The catch was always trust: who holds the pot, who saw your balance, was the draw honest? Àjọ rebuilds *esusu* on Zama's FHEVM — private balances, public fairness." |
+| 3 | 0:34–0:52 | Connect Wallet → **Mint 1,000 cUSDT** → MetaMask confirm → activity log. | "I mint some confidential cUSDT — an ERC-7984 token, so even the token balance is encrypted." |
+| 4 | 0:52–1:14 | Type **500**, click **Deposit privately** → MetaMask confirm → "Deposited (encrypted)". | "Now I deposit. Watch: the amount is encrypted in my browser *before* it leaves this page. On-chain, my deposit is ciphertext — not hidden behind a UI, the state itself is encrypted." |
+| 5 | 1:14–1:32 | Click **🔓 Reveal my balance** → 🔒 → sign EIP-712 in MetaMask → shows **500 cUSDT**. | "My balance reads as encrypted. When I decrypt it, the network checks a signature only I can give and hands the number back to me alone. No one else can run this." |
+| 6 | 1:32–1:42 | Cut to terminal: `node scripts/stage-round.mjs 250` scrolling to "REVEALED — claims are open". | "Each round a keeper triggers the draw — it funds the prize, commits to a secret seed, then reveals it." |
+| 7 | 1:42–2:12 | Evidence page `/#evidence` (live Phase: Revealed) → click the **revealSeed** tx on Etherscan, then the **claim** tx. | "Here's the seed, public on Etherscan — anyone can read it. The winner is weighted by deposit size, but the entire check runs over encrypted balances: `p · total < 2^64 · balance`. Anyone can recompute `p` from the seed and audit the draw — yet every balance stays encrypted. No decryption, no trusted scorer." |
+| 8 | 2:12–2:34 | Back to app → **Claim this round** → MetaMask → **Reveal my balance** now shows **750** → **Withdraw**. | "I claim. My encrypted balance jumps by the prize — and only I can see it. It's no-loss: I withdraw principal plus winnings any time. Over-withdraw and the contract just clamps to my balance — it never reverts, so it never leaks how much I had." |
+| 9 | 2:34–2:50 | Evidence page proof trail (the tx list) + contracts, then the Àjọ hero. | "No mocked data — the full lifecycle is live on Sepolia, sixteen tests green, built on OpenZeppelin's ERC-7984 and Zama FHEVM. Àjọ: the community savings I grew up with, with encrypted balances and a draw the whole world can verify. *Esusu*, on-chain." |
+
+---
+
+## Clean script (read straight through, ~2:45)
+
+> This is a savings lottery where I can prove the pool is real and the draw is fair — but I can't see anyone's balance, and nobody can see mine. Every figure here lives encrypted, on-chain.
+>
+> Where I'm from in Nigeria we call this *esusu* — everyone pays into a pot, nobody loses their money, and each round someone wins. The catch was always trust: who holds the pot, who saw your balance, was the draw honest? Àjọ rebuilds *esusu* on Zama's FHEVM — private balances, public fairness.
+>
+> I mint some confidential cUSDT — an ERC-7984 token, so even the token balance is encrypted. Now I deposit. Watch: the amount is encrypted in my browser before it leaves this page. On-chain, my deposit is ciphertext — not hidden behind a UI, the state itself is encrypted.
+>
+> My balance reads as encrypted. When I decrypt it, the network checks a signature only I can give and hands the number back to me alone. No one else can run this.
+>
+> Each round a keeper triggers the draw — it funds the prize, commits to a secret seed, then reveals it. Here's the seed, public on Etherscan — anyone can read it. The winner is weighted by deposit size, but the entire check runs over encrypted balances: p times total, less than two-to-the-sixty-four times balance. Anyone can recompute p from the seed and audit the draw — yet every balance stays encrypted. No decryption, no trusted scorer.
+>
+> I claim. My encrypted balance jumps by the prize — and only I can see it. It's no-loss: I withdraw principal plus winnings any time. Over-withdraw and the contract just clamps to my balance — it never reverts, so it never leaks how much I had.
+>
+> No mocked data — the full lifecycle is live on Sepolia, sixteen tests green, built on OpenZeppelin's ERC-7984 and Zama FHEVM. Àjọ: the community savings I grew up with, with encrypted balances and a draw the whole world can verify. *Esusu*, on-chain.
+
+---
+
+## Recording notes
+
+- **Skip boilerplate** — don't film wallet unlock or network-switch fumbling; start each beat on the action.
+- MetaMask popups are fine to show (they prove it's real), but keep them quick — cut dead air while a tx confirms; the activity log gives you a natural "confirmed" beat to land on.
+- Film in **1080p**, browser zoomed so text is legible on a phone.
+- Upload to **YouTube (unlisted or public), not "made for kids"**, and put the link in the README + submission form. Upload early — processing varies.
+- If a take of the encrypt/claim stalls, it's the WASM/relayer — wait it out once to warm it, then re-take (see staging step 2).
+- After you have the video URL, I'll drop it into the README, the submission form, and the X post.

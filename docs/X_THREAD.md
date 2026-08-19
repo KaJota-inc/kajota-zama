@@ -1,39 +1,37 @@
-# X thread — KaJota Confidential Pay (for the Zama Builder Track submission)
+# X thread — Àjọ (Zama Developer Program S4)
 
-Post as a thread (5 tweets). Replace **[VIDEO LINK]** with the final real-voice video URL. Verify the Zama handle before
-posting (likely `@zama_fhe`). Keep the demo GIF/clip attached to tweet 1 for reach.
-
----
-
-**1/ 🧵** Introducing KaJota Confidential Pay — private payments on Ethereum.
-
-On a normal chain, everyone sees your balance and every amount you send. We fixed that: balances _and_ transfer amounts
-stay fully encrypted on-chain, powered by FHEVM.
-
-Try it 👇 https://kajota-confidential-pay.vercel.app [VIDEO LINK]
+Post as a 4-tweet thread. Attach a demo GIF/clip to tweet 1 for reach. `@zama` + `#ZamaDeveloperProgram` are in tweet 1 (the program requirement). Add the YouTube link to tweet 4 once the video is up. Verify the repo branch is pushed before posting (links must resolve).
 
 ---
 
-**2/** How? Fully Homomorphic Encryption.
+**1/**
+Meet Àjọ — a Confidential PoolTogether on @zama FHEVM.
 
-Every balance is an encrypted `euint64`. You encrypt the amount in your browser; the contract computes on the
-_ciphertext_ — comparisons, transfers, all without ever decrypting. The chain only ever stores ciphertext. 🔐
+No-loss savings lottery: deposits, balances & winnings stay encrypted on-chain, yet a single winner is chosen by a draw anyone can verify.
 
----
-
-**3/** The clever part: if you try to overspend, the contract moves exactly **0** instead of reverting.
-
-So a failed transfer is indistinguishable on-chain from a funded one — no balance information leaks, ever. Privacy
-_with_ public verifiability.
+Digital esusu, on-chain 🔒🎲
+https://ajo-confidential.vercel.app
+#ZamaDeveloperProgram
 
 ---
 
-**4/** It also does confidential disperse: split a private balance across many recipients in a single tx, each amount
-individually encrypted — a confidential payout / private airdrop. 💸
+**2/**
+The hard part: a fair *public* lottery over *encrypted* balances.
+
+Public seed → an encrypted winning ticket `target = r·total / 2^64`. The contract walks an encrypted prefix sum and flags the one account whose range contains it — all on ciphertext. Anyone can re-derive the randomness and audit the draw; nobody sees the amounts.
 
 ---
 
-**5/** Live on Sepolia right now: • Contract `0xe4292f6a…F342` • Real confidential deploy + transfer + disperse — all
-verifiable on-chain • Open source → https://github.com/KaJota-inc/kajota-zama
+**3/**
+Built on OpenZeppelin's ERC-7984 confidential token (cUSDT) + Zama FHEVM.
 
-Built for the Developer Program Mainnet Season 3. @zama_fhe @zama_fheAfrica #FHE #FHEVM
+Yield on the pooled principal funds a rollover jackpot; principal is withdrawable any time, and only the winner can decrypt their prize. It's esusu — the rotating savings millions across West Africa already run, minus the custodian.
+
+---
+
+**4/**
+No mocked data — the full deposit → yield → draw → claim → withdraw lifecycle is live on Sepolia, 18/18 tests green.
+
+Verify it yourself, no login → https://ajo-confidential.vercel.app/#evidence
+Code → https://github.com/KaJota-inc/kajota-zama
+Demo → [YouTube link]
