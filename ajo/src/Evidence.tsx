@@ -103,10 +103,94 @@ export function Evidence() {
         </ol>
       </section>
 
+      <LiveActivity />
+
       <DrawVerifier />
 
       <footer>Àjọ · Confidential PoolTogether · Zama Developer Program — Season 4</footer>
     </div>
+  );
+}
+
+type Ev = { block: number; tx: string; label: string };
+
+// Live on-chain activity + round stats, read straight from contract events over the public RPC.
+function LiveActivity() {
+  const [events, setEvents] = useState<Ev[] | null>(null);
+  const [stats, setStats] = useState<{ rounds: number; deposits: number; yield: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const p = new ethers.JsonRpcProvider(RPC);
+        const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, p);
+        const latest = await p.getBlockNumber();
+        const from = Math.max(0, latest - 20000);
+        const [dep, yld, rev, clm, wd, cls] = await Promise.all([
+          pool.queryFilter("Deposited", from, latest),
+          pool.queryFilter("YieldHarvested", from, latest),
+          pool.queryFilter("RoundRevealed", from, latest),
+          pool.queryFilter("Claimed", from, latest),
+          pool.queryFilter("Withdrawn", from, latest),
+          pool.queryFilter("RoundClosed", from, latest),
+        ]);
+        const arg = (e: ethers.Log | ethers.EventLog, i: number) =>
+          "args" in e ? (e as ethers.EventLog).args[i] : undefined;
+        const mk = (list: (ethers.Log | ethers.EventLog)[], label: (e: ethers.Log | ethers.EventLog) => string): Ev[] =>
+          list.map((e) => ({ block: e.blockNumber, tx: e.transactionHash, label: label(e) }));
+
+        const all: Ev[] = [
+          ...mk(dep, (e) => `Deposit by ${short(String(arg(e, 0)))}`),
+          ...mk(yld, (e) => `Yield harvested +${Number(arg(e, 0)) / 1e6} cUSDT → jackpot ${Number(arg(e, 1)) / 1e6}`),
+          ...mk(rev, (e) => `Round #${arg(e, 0)} drawn — seed revealed (public randomness)`),
+          ...mk(clm, (e) => `Claim by ${short(String(arg(e, 1)))} (round #${arg(e, 0)})`),
+          ...mk(wd, (e) => `Withdraw by ${short(String(arg(e, 0)))}`),
+          ...mk(cls, (e) => `Round #${arg(e, 0)} closed`),
+        ].sort((a, b) => b.block - a.block);
+
+        const totalYield = yld.reduce((s, e) => s + Number(("args" in e ? (e as ethers.EventLog).args[0] : 0)) / 1e6, 0);
+        setStats({ rounds: rev.length, deposits: dep.length, yield: totalYield });
+        setEvents(all.slice(0, 18));
+      } catch {
+        setEvents([]);
+      }
+    })();
+  }, []);
+
+  return (
+    <section className="card">
+      <h2>Live on-chain activity</h2>
+      {stats && (
+        <div className="status" style={{ margin: "6px 0 14px" }}>
+          <div className="stat">
+            <span className="k">Rounds drawn</span>
+            <span className="v">{stats.rounds}</span>
+          </div>
+          <div className="stat">
+            <span className="k">Deposits</span>
+            <span className="v">{stats.deposits}</span>
+          </div>
+          <div className="stat">
+            <span className="k">Yield harvested</span>
+            <span className="v">{stats.yield} cUSDT</span>
+          </div>
+        </div>
+      )}
+      {events === null ? (
+        <p className="muted">Reading events…</p>
+      ) : events.length === 0 ? (
+        <p className="muted">No recent events.</p>
+      ) : (
+        events.map((e, i) => (
+          <div key={i} className="evrow">
+            <span>{e.label}</span>
+            <a className="link" href={`${EXPLORER}/tx/${e.tx}`} target="_blank" rel="noreferrer">
+              {short(e.tx)} ↗
+            </a>
+          </div>
+        ))
+      )}
+    </section>
   );
 }
 
