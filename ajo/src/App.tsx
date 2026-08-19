@@ -3,6 +3,7 @@ import { usePool } from "./usePool";
 import { Classic } from "./Classic";
 import { Game } from "./Game";
 import { Evidence } from "./Evidence";
+import { Shield } from "./Shield";
 
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 
@@ -14,6 +15,7 @@ export default function App() {
     return () => window.removeEventListener("hashchange", h);
   }, []);
   if (route === "#evidence") return <Evidence />;
+  if (route === "#shield") return <Shield />;
   return <Shell />;
 }
 
@@ -32,8 +34,9 @@ function Shell() {
         </div>
         <p className="sub">
           A no-loss prize-savings pool on <b>Zama FHEVM</b>. Deposit confidential <b>cUSDT</b>; balances and winnings stay
-          encrypted on-chain. Each round a public seed picks <i>one winner, weighted by your encrypted deposit</i> —
-          provably fair, yet nobody sees your balance. Digital <i>esusu</i>.
+          encrypted on-chain. Each round a public seed picks <i>one winner, weighted by your time-weighted deposit</i> —
+          provably fair, yet nobody sees your balance. Digital <i>esusu</i>, restored: the pot <i>and</i> the trust
+          circle — humans and safe autonomous agents alike (see <a className="link" href="#shield">🛡️ Shield</a>).
         </p>
         <nav>
           {p.connected ? (
@@ -55,6 +58,9 @@ function Shell() {
               </button>
             </div>
           )}
+          <a className="link" href="#shield">
+            🛡️ Shield
+          </a>
           <a className="link" href="#evidence">
             Evidence ↗
           </a>
