@@ -12,7 +12,7 @@ const MAX_DEADLINE = 281474976710655n; // ERC-7984 operator max (uint48)
 
 describe("Kajota Shield — mandate × oracle × confidential rail", function () {
   let bank: HardhatEthersSigner, principal: HardhatEthersSigner, agent: HardhatEthersSigner;
-  let cleanM: HardhatEthersSigner, riskyM: HardhatEthersSigner;
+  let cleanM: HardhatEthersSigner, riskyM: HardhatEthersSigner, monitor: HardhatEthersSigner;
   let cusdt: ConfidentialUSDT, oracle: FraudOracle, mandate: AgentMandate;
   let cusdtAddr: string, oracleAddr: string, mandateAddr: string;
 
@@ -46,7 +46,7 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
 
   before(async function () {
     const s = await ethers.getSigners();
-    [bank, principal, agent, cleanM, riskyM] = [s[0], s[1], s[2], s[3], s[4]];
+    [bank, principal, agent, cleanM, riskyM, monitor] = [s[0], s[1], s[2], s[3], s[4], s[5]];
   });
 
   beforeEach(async function () {
@@ -102,9 +102,20 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
   });
 
   it("kill switch: a paused agent cannot spend", async function () {
-    await (await mandate.connect(principal).setPaused(agent.address, true)).wait();
+    await (await mandate.connect(principal).setPaused(agent.address, true, "manual")).wait();
     const enc = await fhevm.createEncryptedInput(mandateAddr, agent.address).add64(100).encrypt();
     await expect(mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof)).to.be.revertedWithCustomError(mandate, "IsPaused");
+  });
+
+  it("guardian (anomaly monitor) can trip the kill switch but not resume", async function () {
+    await (await mandate.connect(principal).setGuardian(agent.address, monitor.address)).wait();
+    // monitor trips the switch on a detected anomaly
+    await (await mandate.connect(monitor).setPaused(agent.address, true, "velocity anomaly")).wait();
+    const enc = await fhevm.createEncryptedInput(mandateAddr, agent.address).add64(100).encrypt();
+    await expect(mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof)).to.be.revertedWithCustomError(mandate, "IsPaused");
+    // but only the human principal may resume
+    await expect(mandate.connect(monitor).setPaused(agent.address, false, "clear")).to.be.revertedWithCustomError(mandate, "NotGuardian");
+    await (await mandate.connect(principal).setPaused(agent.address, false, "reviewed")).wait();
   });
 
   it("rejects a merchant that isn't on the allow-list", async function () {

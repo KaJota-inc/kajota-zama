@@ -39,13 +39,16 @@ contract AgentMandate is ZamaEthereumConfig {
     mapping(address => Mandate) private _m; // agent => mandate
     mapping(address => mapping(address => bool)) public merchantAllowed; // agent => merchant => ok
     mapping(address => euint64) private _lastApplied; // most recent amount actually moved
+    mapping(address => address) public guardianOf; // agent => anomaly monitor allowed to pause
 
     event AgentRegistered(address indexed agent, address indexed principal, uint48 expiry);
     event MerchantSet(address indexed agent, address indexed merchant, bool allowed);
-    event Paused(address indexed agent, bool paused);
+    event GuardianSet(address indexed agent, address indexed guardian);
+    event Paused(address indexed agent, bool paused, address by, string reason);
     event Spend(address indexed agent, address indexed merchant); // amount is encrypted
 
     error NotPrincipal();
+    error NotGuardian();
     error Inactive();
     error IsPaused();
     error Expired();
@@ -96,12 +99,23 @@ contract AgentMandate is ZamaEthereumConfig {
         emit MerchantSet(agent, merchant, allowed);
     }
 
-    /// @notice Kill switch — the principal (or an off-chain anomaly monitor they authorise) freezes
-    ///         the agent instantly.
-    function setPaused(address agent, bool p) external {
+    /// @notice Appoint an off-chain anomaly monitor that may pause (but never un-pause) this agent.
+    function setGuardian(address agent, address guardian) external {
         if (_m[agent].principal != msg.sender) revert NotPrincipal();
-        _m[agent].paused = p;
-        emit Paused(agent, p);
+        guardianOf[agent] = guardian;
+        emit GuardianSet(agent, guardian);
+    }
+
+    /// @notice Kill switch. The principal may pause or resume with any reason; the appointed
+    ///         guardian (anomaly monitor) may only PAUSE — deterministic detection trips the switch,
+    ///         a human decides whether to resume.
+    function setPaused(address agent, bool p, string calldata reason) external {
+        Mandate storage m = _m[agent];
+        bool isPrincipal = m.principal == msg.sender;
+        bool guardianTrip = p && guardianOf[agent] == msg.sender;
+        if (!isPrincipal && !guardianTrip) revert NotGuardian();
+        m.paused = p;
+        emit Paused(agent, p, msg.sender, reason);
     }
 
     // ── the guarded, executed spend ────────────────────────────────────────────────────────
