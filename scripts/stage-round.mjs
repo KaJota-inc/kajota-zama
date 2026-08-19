@@ -19,6 +19,7 @@ const POOL_ABI = [
   "function harvestYield(uint64 amount)",
   "function commitRound(bytes32 commitment, uint256 revealWindow)",
   "function revealSeed(bytes32 seed)",
+  "function tallyDraw(uint256 count)",
   "function runDraw(uint256 count)",
   "function participantsCount() view returns (uint256)",
   "function phase() view returns (uint8)",
@@ -43,8 +44,10 @@ async function main() {
   await send("harvestYield (fund jackpot)", pool, "harvestYield", [PRIZE], 2_500_000n);
   await send("commitRound", pool, "commitRound", [keccak256(SEED), 3600n], 500_000n);
   await send("revealSeed", pool, "revealSeed", [SEED], 500_000n);
-  const n = await pool.participantsCount();
-  await send(`runDraw (${n} participants)`, pool, "runDraw", [n], 8_000_000n);
+  // TWAB is HCU-heavy → tally + draw one participant per tx.
+  const n = Number(await pool.participantsCount());
+  for (let i = 0; i < n; i++) await send(`tallyDraw ${i + 1}/${n}`, pool, "tallyDraw", [1n], 6_000_000n);
+  for (let i = 0; i < n; i++) await send(`runDraw ${i + 1}/${n}`, pool, "runDraw", [1n], 6_000_000n);
 
   console.log(`\n✅ Round #${(await pool.roundId()).toString()} drawn — claims are open. Go click "Claim this round".`);
 }

@@ -26,6 +26,7 @@ const POOL_ABI = [
   "function harvestYield(uint64 amount)",
   "function commitRound(bytes32 commitment, uint256 revealWindow)",
   "function revealSeed(bytes32 seed)",
+  "function tallyDraw(uint256 count)",
   "function runDraw(uint256 count)",
   "function claim()",
   "function disclosePublicTotal()",
@@ -77,11 +78,14 @@ async function main() {
   // 4) commit the draw
   await send("commitRound (freeze total, hide seed)", pool, "commitRound", [keccak256(SEED), 3600n], 500_000n);
 
-  // 5) reveal the seed → public randomness → encrypted winning ticket
+  // 5) reveal the seed → public randomness
   await send("revealSeed (public randomness)", pool, "revealSeed", [SEED], 500_000n);
 
-  // 6) run the single-winner draw over ciphertext
-  await send("runDraw (encrypted cumulative winner)", pool, "runDraw", [10n], 6_000_000n);
+  // 6) tally time-weighted odds (pass 1, paginated for the HCU depth limit)
+  await send("tallyDraw (time-weighted odds)", pool, "tallyDraw", [1n], 6_000_000n);
+
+  // 7) run the single-winner draw over ciphertext (pass 2)
+  await send("runDraw (encrypted cumulative winner)", pool, "runDraw", [1n], 6_000_000n);
 
   // 7) claim — winner takes the jackpot (sole participant wins)
   await send("claim (winner payout)", pool, "claim", [], 3_000_000n);
