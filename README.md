@@ -21,18 +21,19 @@ PoolTogether V5 decides each user's win with a per-user check (`GenerationSoftwa
 PRN % totalSupply  <  winningZone     // bigger balance ⇒ bigger winningZone ⇒ higher odds
 ```
 
-We keep that exact economic model but **re-express it so it runs over encrypted balances with public randomness and zero decryption.** Multiply both sides through and eliminate the modulo:
+We keep that cumulative model but **evaluate it over encrypted balances with public randomness and zero decryption**, and it selects **exactly one winner**:
 
 ```
-                win_i   ⇔   p_i · drawTotal   <   2^64 · balance_i
+ public seed r ─► target = (r · drawTotal) / 2^64        # encrypted winning ticket, uniform in [0, drawTotal)
+ walk participants, carrying an encrypted running prefix:
+        won_i  =  (prefix_i ≤ target)  ∧  (target < prefix_i + balance_i)
 ```
 
-- `p_i = uint64(keccak256(roundId, seed, user_i))` is **PUBLIC** — any observer recomputes it from the revealed seed and audits whether the claim was legitimate.
-- `drawTotal` and `balance_i` are **encrypted** (`euint64`).
-- **Both sides are a PUBLIC-SCALAR × CIPHERTEXT multiply** — cheap, and crucially *not* a ciphertext × ciphertext multiply.
-- Products can reach `2^128`, so operands are promoted `euint64 → euint128` first (a naive `euint64` multiply would silently wrap — see hard-parts table).
-- A single `FHE.lt` yields the encrypted win flag `ebool`; `FHE.select` routes the public prize into the winner's encrypted balance.
-- **O(1) per claim** — PoolTogether-style pull claims, never an O(N) sweep over all depositors.
+- `r = uint64(keccak256(roundId, seed))` is **PUBLIC** — any observer re-derives it from the revealed seed and audits the draw.
+- `target`, `prefix_i` and `balance_i` are **encrypted** (`euint128`/`euint64`). `target` is built with **public-scalar × ciphertext** multiply + scalar divide — *no* ciphertext × ciphertext multiply, *no* decryption.
+- Because the intervals `[prefix_i, prefix_i + balance_i)` tile `[0, drawTotal)`, **exactly one** contains `target` → exactly one winner, weighted by deposit size. `FHE.select` routes the public jackpot into that winner's encrypted balance.
+- Operands are promoted `euint64 → euint128` before the multiply so the `≤ 2^128` products can't silently wrap (see hard-parts table).
+- `runDraw(count)` is **paginated** — the encrypted prefix walk resumes across transactions, so a large pool draws in bounded-gas steps. Claims are then O(1).
 
 **Randomness is commit-reveal, not `FHE.randEuint64`.** The operator commits `keccak256(seed)` *before* the seed is known and reveals later. This is the whole point: `FHE.randEuint64` returns a *ciphertext*, which would make the draw unauditable and defeat "publicly verifiable winner selection." Deposits **freeze at commit**, so no one can grind their balance against a seed they can already see. **Liveness escape hatch:** if the operator never reveals, anyone can void the round and unfreeze funds.
 
@@ -65,10 +66,11 @@ flowchart LR
 ## How it works
 
 1. **Deposit** — user calls `confidentialTransferAndCall` on cUSDT; the pool's `onConfidentialTransferReceived` credits an encrypted `euint64` balance. Principal is theirs, always.
-2. **Fund + commit** — prize reserve is funded; operator publishes `commitRound(keccak256(seed))`. Deposits freeze for the round.
-3. **Reveal** — operator calls `revealSeed(seed)`; the hash must match. The seed is now public and immutable.
-4. **Claim** — each depositor (or a claimer bot) submits a pull claim. The contract computes `p_i·drawTotal < 2^64·balance_i` entirely over ciphertext, derives an `ebool`, and `FHE.select`s the public prize into the winner's encrypted balance. Losers pay gas, lose nothing.
-5. **Withdraw** — any time, `FHE.min(requested, balance)` clamps to available funds and moves cUSDT back out. Principal + any prize, encrypted throughout.
+2. **Yield → jackpot** — `harvestYield(amount)` accrues yield on the pooled principal into a **public rollover jackpot** (a testnet stand-in for an ERC-4626 adapter; the jackpot grows the longer between draws).
+3. **Commit** — operator publishes `commitRound(keccak256(seed))`; `drawTotal` freezes and deposits lock for the round.
+4. **Reveal + draw** — `revealSeed(seed)` (hash must match) derives the encrypted `target`; `runDraw(count)` walks the encrypted prefix sum and flags the single winner — all over ciphertext.
+5. **Claim** — each depositor pulls a claim; `FHE.select` credits the jackpot to the winner's encrypted balance, everyone else an encrypted 0. Reveal your balance to see if you won.
+6. **Withdraw** — any time, `FHE.min(requested, balance)` clamps to available funds and moves cUSDT back out. Principal + any winnings, encrypted throughout.
 
 ---
 
@@ -101,7 +103,7 @@ flowchart LR
 
 | # | Constraint | Solution |
 |---|---|---|
-| 1 | **Verifiable *yet* encrypted winner selection** | Re-expressed PoolTogether's `PRN % total < zone` as `p·total < 2^64·balance` — runs over ciphertext with *public* randomness (`keccak256(roundId, seed, user)`), so anyone re-derives `p_i` and audits the draw with **no decryption**. |
+| 1 | **Verifiable *yet* encrypted single-winner selection** | Public seed → encrypted `target = (r·drawTotal)/2^64`; a paginated walk over the encrypted prefix sum flags the one interval containing `target`. Exactly one winner, weighted by deposit, entirely over ciphertext with public randomness — anyone audits the draw with **no decryption**. |
 | 2 | **Overflow-safe FHE fixed-point** | `p·total` and `2^64·balance` reach `2^128`; a naive `euint64` scalar-multiply silently wraps. Cast `euint64 → euint128` *before* the multiply so both products are exact, then one `FHE.lt`. |
 | 3 | **Withdraw-any-time over encrypted principal** | `FHE.min(requested, balance)` clamps an over-withdraw to exactly the balance — never reverts, and never leaks whether you had enough (a revert would be a decryption oracle). |
 | 4 | **ERC-7984 deposit callback ACL** | The `onConfidentialTransferReceived` return `ebool` must be **both** `FHE.allowThis`'d (receiver-side check) **and** `FHE.allowTransient`'d to the token (it's consumed in the token's refund `FHE.select`) — miss either and `transferAndCall` reverts. |
