@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-08-19T13:02:55.452Z",
+  "contracts": {
+    "AgentMandate": "0xde89064D521D335A15Ef20AbA0eb560FA3aDa1B1",
+    "FraudOracle": "0x9d3D147aceB81F0aE16F32F49f089CE883DE5b92",
+    "ConfidentialUSDT": "0xe4292f6aF1FA9668713269bE1643354a557BF342"
+  },
+  "agent": "0x2F76906b39a484cC43Cf911ffd9893F52258E4C2",
+  "principal": "0xE45E6b01742CDB4e3aECFEb364b2967415C551c1",
+  "monitor": "0xe1baCF1F7c87F1dC03c401c8bD96CD48d3F13D4F",
+  "cap": 1000,
+  "threshold": 50,
+  "finalSpent": 580,
+  "paused": true,
+  "monitorTrip": {
+    "at": 5,
+    "reason": "velocity 6 > 5 in 60s"
+  },
+  "merchants": [
+    {
+      "label": "coffee-api",
+      "flagged": false
+    },
+    {
+      "label": "cloud-bill",
+      "flagged": false
+    },
+    {
+      "label": "shell-co",
+      "flagged": true
+    },
+    {
+      "label": "vendor-3",
+      "flagged": false
+    },
+    {
+      "label": "vendor-4",
+      "flagged": false
+    },
+    {
+      "label": "vendor-5",
+      "flagged": false
+    },
+    {
+      "label": "vendor-6",
+      "flagged": false
+    },
+    {
+      "label": "vendor-7",
+      "flagged": false
+    }
+  ],
+  "timeline": [
+    {
+      "step": 1,
+      "merchant": "coffee-api",
+      "flagged": false,
+      "requested": 200,
+      "applied": 200,
+      "spent": 200,
+      "verdict": "APPROVED",
+      "reason": "within mandate · counterparty clean",
+      "monitorTripped": false
+    },
+    {
+      "step": 2,
+      "merchant": "cloud-bill",
+      "flagged": false,
+      "requested": 300,
+      "applied": 300,
+      "spent": 500,
+      "verdict": "APPROVED",
+      "reason": "within mandate · counterparty clean",
+      "monitorTripped": false
+    },
+    {
+      "step": 3,
+      "merchant": "shell-co",
+      "flagged": true,
+      "requested": 150,
+      "applied": 0,
+      "spent": 500,
+      "verdict": "BLOCKED",
+      "reason": "counterparty network-flagged",
+      "monitorTripped": false
+    },
+    {
+      "step": 4,
+      "merchant": "coffee-api",
+      "flagged": false,
+      "requested": 700,
+      "applied": 0,
+      "spent": 500,
+      "verdict": "BLOCKED",
+      "reason": "over encrypted budget",
+      "monitorTripped": false
+    },
+    {
+      "step": 5,
+      "merchant": "vendor-3",
+      "flagged": false,
+      "requested": 40,
+      "applied": 40,
+      "spent": 540,
+      "verdict": "APPROVED",
+      "reason": "within mandate · counterparty clean",
+      "monitorTripped": false
+    },
+    {
+      "step": 6,
+      "merchant": "vendor-4",
+      "flagged": false,
+      "requested": 40,
+      "applied": 40,
+      "spent": 580,
+      "verdict": "APPROVED",
+      "reason": "within mandate · counterparty clean",
+      "monitorTripped": true
+    },
+    {
+      "step": 7,
+      "merchant": "vendor-5",
+      "flagged": false,
+      "requested": 40,
+      "applied": 0,
+      "spent": 580,
+      "verdict": "BLOCKED",
+      "reason": "agent frozen by anomaly monitor",
+      "monitorTripped": false
+    },
+    {
+      "step": 8,
+      "merchant": "vendor-6",
+      "flagged": false,
+      "requested": 40,
+      "applied": 0,
+      "spent": 580,
+      "verdict": "BLOCKED",
+      "reason": "agent frozen by anomaly monitor",
+      "monitorTripped": false
+    },
+    {
+      "step": 9,
+      "merchant": "vendor-7",
+      "flagged": false,
+      "requested": 40,
+      "applied": 0,
+      "spent": 580,
+      "verdict": "BLOCKED",
+      "reason": "agent frozen by anomaly monitor",
+      "monitorTripped": false
+    }
+  ]
+}
