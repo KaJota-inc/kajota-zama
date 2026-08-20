@@ -42,6 +42,8 @@ export function TontineView() {
       await tx.wait();
       m.say(`✓ ${label} done.`);
     });
+  const bank = () => host("syncDividend", () => m.write!.syncDividend({ gasLimit: 1_000_000n }));
+  const leave = () => host("exit", () => m.write!.exit({ gasLimit: 1_000_000n }));
 
   return (
     <>
@@ -57,7 +59,31 @@ export function TontineView() {
       </div>
 
       {mode === "3d" ? (
-        <Tontine3D activeCount={Number(s?.active ?? 0n)} members={Number(s?.members ?? 0n)} acc={s?.acc ?? 0n} />
+        <div className="mech-3d-wrap">
+          <Tontine3D activeCount={Number(s?.active ?? 0n)} members={Number(s?.members ?? 0n)} acc={s?.acc ?? 0n} />
+          <div className="mech-3d-hud">
+            {!m.connected ? (
+              <button className="primary" onClick={m.connect}>
+                Connect wallet
+              </button>
+            ) : (
+              <>
+                <button className="ghost sm" disabled={!!m.busy} onClick={m.faucet}>
+                  {m.busy === "faucet" ? "…" : "Get coins"}
+                </button>
+                <button className="ghost sm" disabled={!!m.busy} onClick={() => m.deposit(1000)}>
+                  {m.busy === "deposit" ? "…" : "Join (1,000)"}
+                </button>
+                <button className="gold sm" disabled={!!m.busy || !mine?.active} onClick={bank}>
+                  {m.busy === "syncDividend" ? "…" : "💰 Bank dividend"}
+                </button>
+                <button className="ghost sm" disabled={!!m.busy || !mine?.active} onClick={leave}>
+                  {m.busy === "exit" ? "…" : "🚪 Leave"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       ) : (
         <section className="intro">
           <div className="intro-points">

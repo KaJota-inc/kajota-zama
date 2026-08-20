@@ -57,6 +57,7 @@ export function ChitView() {
       m.say(`✓ ${label} done.`);
     });
   const settledRound = s ? (s.round > 0n ? s.round - 1n : 0n) : 0n;
+  const collect = () => host("claim", () => m.write!.claim(settledRound, { gasLimit: 3_000_000n }));
 
   return (
     <>
@@ -72,7 +73,32 @@ export function ChitView() {
       </div>
 
       {mode === "3d" ? (
-        <Chit3D pot={s?.pot ?? 0n} bidders={Number(s?.bidders ?? 0n)} settled={!!s?.settled} />
+        <div className="mech-3d-wrap">
+          <Chit3D pot={s?.pot ?? 0n} bidders={Number(s?.bidders ?? 0n)} settled={!!s?.settled} />
+          <div className="mech-3d-hud">
+            {!m.connected ? (
+              <button className="primary" onClick={m.connect}>
+                Connect wallet
+              </button>
+            ) : (
+              <>
+                <button className="ghost sm" disabled={!!m.busy} onClick={m.faucet}>
+                  {m.busy === "faucet" ? "…" : "Get coins"}
+                </button>
+                <button className="ghost sm" disabled={!!m.busy} onClick={() => m.deposit(1000)}>
+                  {m.busy === "deposit" ? "…" : "Join (1,000)"}
+                </button>
+                <input className="hud-input" value={bid} onChange={(e) => setBid(e.target.value)} inputMode="decimal" />
+                <button className="gold sm" disabled={!!m.busy || phase !== 1} onClick={placeBid}>
+                  {m.busy === "bid" ? "Sealing…" : "🔨 Bid"}
+                </button>
+                <button className="primary sm" disabled={!!m.busy || !s?.settled} onClick={collect}>
+                  {m.busy === "claim" ? "…" : "🎁 Collect"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       ) : (
         <section className="intro">
           <div className="intro-points">
