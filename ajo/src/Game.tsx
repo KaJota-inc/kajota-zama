@@ -69,6 +69,36 @@ function Vault({ jackpot, drawing }: { jackpot: bigint; drawing: boolean }) {
   );
 }
 
+// The boundary of the circle you dived into — you are literally inside the ring now. Settles from
+// a wide sweep on mount so entering a circle reads as passing through its rim.
+function EnclosingRing({ drawing }: { drawing: boolean }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const t = useRef(0);
+  useFrame((_, delta) => {
+    const m = ref.current;
+    if (!m) return;
+    m.rotation.z += drawing ? 0.02 : 0.003;
+    t.current = Math.min(1, t.current + delta / 0.9);
+    const ease = 1 - Math.pow(1 - t.current, 3);
+    const s = 1.35 - 0.35 * ease;
+    m.scale.set(s, s, s);
+  });
+  return (
+    <mesh ref={ref} rotation={[Math.PI / 2.4, 0, 0]}>
+      <torusGeometry args={[5, 0.11, 20, 140]} />
+      <meshStandardMaterial
+        color={GOLD}
+        emissive={GOLD}
+        emissiveIntensity={drawing ? 0.9 : 0.45}
+        metalness={0.85}
+        roughness={0.2}
+        transparent
+        opacity={0.8}
+      />
+    </mesh>
+  );
+}
+
 function Scene({ tickets, winnerIdx, drawing, jackpot }: { tickets: number; winnerIdx: number; drawing: boolean; jackpot: bigint }) {
   const radius = 3.2;
   return (
@@ -77,6 +107,7 @@ function Scene({ tickets, winnerIdx, drawing, jackpot }: { tickets: number; winn
       <pointLight position={[6, 8, 6]} intensity={120} color={GOLD} />
       <pointLight position={[-6, -4, -6]} intensity={80} color={TEAL} />
       <Stars radius={60} depth={40} count={2500} factor={4} fade speed={1} />
+      <EnclosingRing drawing={drawing} />
       <Float speed={1.4} rotationIntensity={0.3} floatIntensity={0.6}>
         <Vault jackpot={jackpot} drawing={drawing} />
       </Float>
@@ -91,7 +122,7 @@ function Scene({ tickets, winnerIdx, drawing, jackpot }: { tickets: number; winn
 /// The 3D "game mode" — a visualization on top of the same on-chain pool. The vault holds the
 /// jackpot; each crystal is an encrypted ticket. "Spin the draw" plays the reveal (and fires the
 /// real on-chain claim when a round is live).
-export function Game({ p }: { p: PoolState }) {
+export function Game({ p, circleName, onExit }: { p: PoolState; circleName?: string; onExit?: () => void }) {
   const [drawing, setDrawing] = useState(false);
   const [winnerIdx, setWinnerIdx] = useState(-1);
   const tickets = Math.max(Number(p.count), 6);
@@ -107,7 +138,19 @@ export function Game({ p }: { p: PoolState }) {
   };
 
   return (
-    <div className="game">
+    <div className="game dive-in">
+      {circleName && (
+        <div className="game-topbar">
+          {onExit && (
+            <button className="ghost sm" onClick={onExit}>
+              ← Galaxy
+            </button>
+          )}
+          <span className="game-circle">
+            Inside <b>{circleName}</b>
+          </span>
+        </div>
+      )}
       <Canvas camera={{ position: [0, 2.5, 9], fov: 50 }} style={{ background: "transparent" }}>
         <Scene tickets={tickets} winnerIdx={winnerIdx} drawing={drawing} jackpot={p.jackpot} />
       </Canvas>

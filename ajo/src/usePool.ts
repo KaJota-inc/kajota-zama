@@ -14,7 +14,7 @@ type Eip1193 = ethers.Eip1193Provider & { on?: (e: string, cb: (...a: unknown[])
 
 /// Shared wallet + contract state and actions for Àjọ. Both the classic dApp view and the
 /// 3D game view consume this, so they never drift.
-export function usePool() {
+export function usePool(POOL: string = POOL_ADDRESS) {
   const [address, setAddress] = useState<string>();
   const [chainOk, setChainOk] = useState(true);
   const [signer, setSigner] = useState<ethers.Signer>();
@@ -39,7 +39,7 @@ export function usePool() {
   const readProvider = useMemo(() => provider ?? new ethers.JsonRpcProvider(PUBLIC_RPC), [provider]);
 
   const refresh = useCallback(async () => {
-    const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, readProvider);
+    const pool = new ethers.Contract(POOL, POOL_ABI, readProvider);
     try {
       const [ph, rid, jp, ct, ow] = await Promise.all([
         pool.phase(),
@@ -56,7 +56,7 @@ export function usePool() {
     } catch {
       /* rpc hiccup */
     }
-  }, [readProvider]);
+  }, [readProvider, POOL]);
 
   useEffect(() => {
     void refresh();
@@ -112,7 +112,7 @@ export function usePool() {
       const { handle, proof } = await encryptAmount(inst, CUSDT_ADDRESS, address!, toUnits(amount));
       const c = new ethers.Contract(CUSDT_ADDRESS, CUSDT_ABI, signer);
       const tx = await c["confidentialTransferAndCall(address,bytes32,bytes,bytes)"](
-        POOL_ADDRESS,
+        POOL,
         handle,
         proof,
         "0x",
@@ -126,15 +126,15 @@ export function usePool() {
   const revealBalance = () =>
     run("reveal", async () => {
       const inst = await getFhevmInstance();
-      const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, provider);
-      const clear = await userDecryptBalance(inst, signer!, POOL_ADDRESS, await pool.balanceOf(address));
+      const pool = new ethers.Contract(POOL, POOL_ABI, provider);
+      const clear = await userDecryptBalance(inst, signer!, POOL, await pool.balanceOf(address));
       setMyBalance(clear);
       say(`✓ Your balance: ${fromUnits(clear)} cUSDT (decrypted for you only).`);
     });
 
   const claim = () =>
     run("claim", async () => {
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       const tx = await c.claim({ gasLimit: FHE_GAS });
       say(`Claim ${short(tx.hash)} … (winner payout)`);
       await tx.wait();
@@ -144,8 +144,8 @@ export function usePool() {
   const withdraw = (amount: number) =>
     run("withdraw", async () => {
       const inst = await getFhevmInstance();
-      const { handle, proof } = await encryptAmount(inst, POOL_ADDRESS, address!, toUnits(amount));
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const { handle, proof } = await encryptAmount(inst, POOL, address!, toUnits(amount));
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       const tx = await c.withdraw(handle, proof, { gasLimit: FHE_GAS });
       say(`Withdraw ${short(tx.hash)} …`);
       await tx.wait();
@@ -154,21 +154,21 @@ export function usePool() {
 
   const discloseTotal = () =>
     run("disclose", async () => {
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.disclosePublicTotal({ gasLimit: 500_000n })).wait();
       const inst = await getFhevmInstance();
-      const pool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, provider);
+      const pool = new ethers.Contract(POOL, POOL_ABI, provider);
       const t = await publicDecrypt(inst, await pool.totalPooled());
       setPublicTotal(t);
       say(`✓ Public pool total: ${t === null ? "—" : fromUnits(t)} cUSDT.`);
     });
 
   // ── Operator controls (owner only) — run a full draw in-app, no CLI ────────────────────
-  const seedKey = (rid: bigint) => `ajo-seed-${POOL_ADDRESS}-${rid.toString()}`;
+  const seedKey = (rid: bigint) => `ajo-seed-${POOL}-${rid.toString()}`;
 
   const harvest = () =>
     run("harvest", async () => {
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.harvestYield(toUnits(250), { gasLimit: 2_500_000n })).wait();
       say("✓ Harvested 250 cUSDT of yield into the jackpot.");
     });
@@ -177,7 +177,7 @@ export function usePool() {
     run("commit", async () => {
       const seed = ethers.hexlify(ethers.randomBytes(32));
       localStorage.setItem(seedKey(roundId), seed);
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.commitRound(ethers.keccak256(seed), 3600n, { gasLimit: 600_000n })).wait();
       say("✓ Committed a hidden seed — deposits frozen, draw armed.");
     });
@@ -186,21 +186,21 @@ export function usePool() {
     run("reveal-seed", async () => {
       const seed = localStorage.getItem(seedKey(roundId));
       if (!seed) throw new Error("seed for this round not found in this browser");
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.revealSeed(seed, { gasLimit: 600_000n })).wait();
       say("✓ Seed revealed — public randomness is now on-chain.");
     });
 
   const draw = () =>
     run("draw", async () => {
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.runDraw(count > 0n ? count : 20n, { gasLimit: FHE_GAS })).wait();
       say("✓ Draw run — the winner is flagged (encrypted). Claims are open.");
     });
 
   const close = () =>
     run("close", async () => {
-      const c = new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+      const c = new ethers.Contract(POOL, POOL_ABI, signer);
       await (await c.closeRound({ gasLimit: 400_000n })).wait();
       say("✓ Round closed — deposits reopened.");
     });
@@ -209,6 +209,7 @@ export function usePool() {
 
   return {
     address,
+    signer,
     chainOk,
     connected: !!address,
     phase,

@@ -8,6 +8,10 @@ export const CUSDT_ABI = [
   "function isOperator(address holder, address spender) view returns (bool)",
 ] as const;
 
+export const ORACLE_ABI = [
+  "function reportCount(bytes32) view returns (uint32)",
+] as const;
+
 export const POOL_ABI = [
   "function balanceOf(address user) view returns (bytes32)",
   "function totalPooled() view returns (bytes32)",

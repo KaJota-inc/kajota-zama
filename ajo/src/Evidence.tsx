@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { POOL_ABI } from "./abi";
-import { POOL_ADDRESS, CUSDT_ADDRESS, EXPLORER, PHASES, PROOFS } from "./config";
+import { POOL_ADDRESS, CUSDT_ADDRESS, EXPLORER, STATUS, PROOFS } from "./config";
 
 // Read-only public RPC — no wallet required. This page is the "verify it yourself" surface.
 const RPC = "https://ethereum-sepolia-rpc.publicnode.com";
@@ -40,11 +40,11 @@ export function Evidence() {
           <h1>
             À<span className="accent">jọ</span>
           </h1>
-          <span className="pill">Evidence</span>
+          <span className="pill">Proof</span>
         </div>
         <p className="sub">
-          Everything here is live on <b>Sepolia</b> and verifiable without trusting us — no login, no wallet. Click any
-          hash to open Etherscan.
+          Everything below is <b>really happening</b> on a public blockchain — you don’t need an account, a wallet, or
+          to trust us. Tap any code to see it for yourself on the public ledger.
         </p>
         <nav>
           <a className="link" href="#">
@@ -55,33 +55,34 @@ export function Evidence() {
 
       <section className="status">
         <div className="stat">
-          <span className="k">Live round</span>
+          <span className="k">This round</span>
           <span className="v">#{state?.round ?? "…"}</span>
         </div>
         <div className="stat">
-          <span className="k">Phase</span>
-          <span className="v">{state ? (PHASES[state.phase] ?? state.phase) : "…"}</span>
+          <span className="k">Status</span>
+          <span className="v">{state ? (STATUS[state.phase] ?? `#${state.phase}`) : "…"}</span>
         </div>
         <div className="stat">
-          <span className="k">Jackpot</span>
-          <span className="v">{state?.prize ?? "…"} cUSDT</span>
+          <span className="k">Prize pot</span>
+          <span className="v">{state?.prize ?? "…"} coins</span>
         </div>
         <div className="stat">
-          <span className="k">Depositors</span>
+          <span className="k">Savers</span>
           <span className="v">{state?.count ?? "…"}</span>
         </div>
       </section>
 
       <section className="card">
-        <h2>Verified contracts</h2>
+        <h2>The programs behind it</h2>
+        <p className="hint">The two pieces of software that run Àjọ — public and checkable by anyone.</p>
         <div className="evrow">
-          <span>ConfidentialPool (Àjọ)</span>
+          <span>The savings pool</span>
           <a className="link" href={`${EXPLORER}/address/${POOL_ADDRESS}`} target="_blank" rel="noreferrer">
             {short(POOL_ADDRESS)} ↗
           </a>
         </div>
         <div className="evrow">
-          <span>ConfidentialUSDT (cUSDT · ERC-7984)</span>
+          <span>The coin (cUSDT)</span>
           <a className="link" href={`${EXPLORER}/address/${CUSDT_ADDRESS}`} target="_blank" rel="noreferrer">
             {short(CUSDT_ADDRESS)} ↗
           </a>
@@ -89,8 +90,8 @@ export function Evidence() {
       </section>
 
       <section className="card">
-        <h2>On-chain proof trail — no mocked data</h2>
-        <p className="hint">The full deposit → commit → reveal → claim → withdraw lifecycle, executed on Sepolia.</p>
+        <h2>Every step really happened</h2>
+        <p className="hint">A whole round — from adding coins to picking a winner to cashing out — recorded on the blockchain. Nothing here is faked.</p>
         <ol className="proofs">
           {PROOFS.map((pr) => (
             <li key={pr.txHash}>
@@ -140,12 +141,12 @@ function LiveActivity() {
           list.map((e) => ({ block: e.blockNumber, tx: e.transactionHash, label: label(e) }));
 
         const all: Ev[] = [
-          ...mk(dep, (e) => `Deposit by ${short(String(arg(e, 0)))}`),
-          ...mk(yld, (e) => `Yield harvested +${Number(arg(e, 0)) / 1e6} cUSDT → jackpot ${Number(arg(e, 1)) / 1e6}`),
-          ...mk(rev, (e) => `Round #${arg(e, 0)} drawn — seed revealed (public randomness)`),
-          ...mk(clm, (e) => `Claim by ${short(String(arg(e, 1)))} (round #${arg(e, 0)})`),
-          ...mk(wd, (e) => `Withdraw by ${short(String(arg(e, 0)))}`),
-          ...mk(cls, (e) => `Round #${arg(e, 0)} closed`),
+          ...mk(dep, (e) => `${short(String(arg(e, 0)))} added coins`),
+          ...mk(yld, (e) => `Prize money added +${Number(arg(e, 0)) / 1e6} → pot now ${Number(arg(e, 1)) / 1e6}`),
+          ...mk(rev, (e) => `Round #${arg(e, 0)} — winner drawn (public randomness)`),
+          ...mk(clm, (e) => `${short(String(arg(e, 1)))} collected winnings (round #${arg(e, 0)})`),
+          ...mk(wd, (e) => `${short(String(arg(e, 0)))} took money out`),
+          ...mk(cls, (e) => `Round #${arg(e, 0)} ended`),
         ].sort((a, b) => b.block - a.block);
 
         const totalYield = yld.reduce((s, e) => s + Number(("args" in e ? (e as ethers.EventLog).args[0] : 0)) / 1e6, 0);
@@ -159,11 +160,11 @@ function LiveActivity() {
 
   return (
     <section className="card">
-      <h2>Live on-chain activity</h2>
+      <h2>What’s been happening</h2>
       {stats && (
         <div className="status" style={{ margin: "6px 0 14px" }}>
           <div className="stat">
-            <span className="k">Rounds drawn</span>
+            <span className="k">Winners drawn</span>
             <span className="v">{stats.rounds}</span>
           </div>
           <div className="stat">
@@ -171,15 +172,15 @@ function LiveActivity() {
             <span className="v">{stats.deposits}</span>
           </div>
           <div className="stat">
-            <span className="k">Yield harvested</span>
-            <span className="v">{stats.yield} cUSDT</span>
+            <span className="k">Prize money added</span>
+            <span className="v">{stats.yield} coins</span>
           </div>
         </div>
       )}
       {events === null ? (
-        <p className="muted">Reading events…</p>
+        <p className="muted">Reading the blockchain…</p>
       ) : events.length === 0 ? (
-        <p className="muted">No recent events.</p>
+        <p className="muted">Nothing recent to show.</p>
       ) : (
         events.map((e, i) => (
           <div key={i} className="evrow">
@@ -218,11 +219,15 @@ function DrawVerifier() {
   };
 
   return (
-    <section className="card">
-      <h2>Verify a draw yourself</h2>
+    <details className="card host">
+      <summary>
+        <span className="host-title">Check the draw was fair — yourself</span>
+        <span className="host-sub">optional · for the curious</span>
+      </summary>
       <p className="hint">
-        The draw's randomness is public. Paste a round and its revealed seed; recompute the commitment and the winning
-        ticket's random `r` — the same values the contract used. No trust required.
+        The draw uses a <b>public random number</b>, so anyone can redo the math and confirm nobody rigged it. Paste a
+        round number and the secret that was revealed for it — we’ll recompute the exact numbers the program used. If
+        they match what’s on the blockchain, the draw was honest.
       </p>
       <div className="row">
         <input style={{ width: 80 }} value={round} onChange={(e) => setRound(e.target.value)} placeholder="round" />
@@ -230,30 +235,31 @@ function DrawVerifier() {
           style={{ width: 320, maxWidth: "100%" }}
           value={seed}
           onChange={(e) => setSeed(e.target.value)}
-          placeholder="revealed seed 0x…"
+          placeholder="revealed secret 0x…"
         />
         <button className="primary" onClick={compute}>
-          Recompute
+          Check
         </button>
       </div>
       {err && <p className="muted" style={{ color: "var(--warn)" }}>{err}</p>}
       {out && (
         <div style={{ marginTop: 10, fontFamily: "ui-monospace, monospace", fontSize: 13 }}>
           <div className="evrow">
-            <span>commitment = keccak256(seed)</span>
+            <span>Fingerprint of the secret</span>
             <code>{out.commitment.slice(0, 14)}…{out.commitment.slice(-8)}</code>
           </div>
           <div className="evrow">
-            <span>public r = uint64(keccak256(roundId, seed))</span>
+            <span>The draw’s random number</span>
             <code>{out.r}</code>
           </div>
           <p className="muted" style={{ marginTop: 8 }}>
-            The contract derives the winning ticket <code>target = (r · drawTotal) / 2^64</code> from this exact{" "}
-            <code>r</code>, then finds the one encrypted balance interval containing it — over ciphertext, no decryption.
-            Check <code>commitment</code> against the pool's <code>seedCommitment</code> to confirm the seed wasn't swapped.
+            The program turns this exact random number into the winning ticket and finds whose savings it lands on —
+            without ever unlocking anyone’s balance. Match the fingerprint above against the one stored on-chain to prove
+            the secret wasn’t swapped after the fact.{" "}
+            <span className="dim">(For developers: <code>r = uint64(keccak256(roundId, seed))</code>, <code>target = (r · drawTotal) / 2^64</code>.)</span>
           </p>
         </div>
       )}
-    </section>
+    </details>
   );
 }

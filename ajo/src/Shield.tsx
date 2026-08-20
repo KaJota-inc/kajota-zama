@@ -13,27 +13,32 @@ export function Shield() {
           <h1>
             À<span className="accent">jọ</span>
           </h1>
-          <span className="pill">Shield · agent-native</span>
+          <span className="pill">Shield · safe AI money</span>
         </div>
         <p className="sub">
-          The pot is only half of <i>esusu</i>. The other half is the <b>trust circle</b> — who may put money in, how
-          much, and whether a counterparty can be trusted. <b>Shield</b> restores it, confidentially: an autonomous
-          agent saves into this pool under a private <b>mandate</b> (encrypted cap, allow-list, kill switch), screened
-          by a shared <b>fraud oracle</b>, watched by an <b>anomaly monitor</b>. A hijacked agent can't move past its
-          bounds.
+          More and more, people let an <b>AI assistant</b> handle small money tasks. The scary part: what if it gets
+          tricked or hijacked? <b>Shield</b> puts it on a leash. You give your assistant a private <b>spending limit</b>{" "}
+          it can’t exceed, a short list of <b>who it’s allowed to pay</b>, and a <b>kill switch</b>. Before paying
+          anyone, it quietly checks a shared <b>warning list</b> — so it can’t be fooled into paying a known bad actor.
+          Even if the assistant is hijacked, it simply can’t move past the limits you set.
         </p>
         <nav>
           <a className="link" href="#">
-            ← Back to the pool
+            ← Back to savings
           </a>
           <a className="link" href={`${EXPLORER}/tx/${BRIDGE_TX}`} target="_blank" rel="noreferrer">
-            live bridge tx ↗
+            see it happen on-chain ↗
           </a>
           <a className="link" href={`${EXPLORER}/address/${MANDATE}#code`} target="_blank" rel="noreferrer">
-            mandate contract ↗
+            the rules, in code ↗
           </a>
         </nav>
       </header>
+
+      <p className="shield-caption">
+        Below is the operator’s-eye view — the live spending limits, the allow-list, and the shared warning list, all
+        working on a test network.
+      </p>
 
       <div
         style={{
@@ -52,8 +57,8 @@ export function Shield() {
       </div>
 
       <footer>
-        One canonical system on Sepolia — the pool, the mandate, the fraud oracle, and the confidential rail. Everything
-        the operator console shows is backed by verified contracts and real transactions.
+        It’s all real: the savings pool, the spending rules, and the shared warning list are live contracts on a test
+        network, backed by real transactions — nothing here is mocked up.
       </footer>
     </div>
   );
