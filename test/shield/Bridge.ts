@@ -17,7 +17,7 @@ describe("Àjọ × Shield — agent-native confidential PoolTogether", function
     pool: ConfidentialPool,
     pool2: ConfidentialPool,
     mandate: AgentMandate;
-  let cusdtAddr: string, oracleAddr: string, poolAddr: string, pool2Addr: string, mandateAddr: string;
+  let _cusdtAddr: string, oracleAddr: string, poolAddr: string, pool2Addr: string, mandateAddr: string;
 
   async function setup() {
     cusdt = (await (await ethers.getContractFactory("ConfidentialUSDT")).deploy()) as ConfidentialUSDT;
@@ -31,7 +31,7 @@ describe("Àjọ × Shield — agent-native confidential PoolTogether", function
     mandate = (await (
       await ethers.getContractFactory("AgentMandate")
     ).deploy(await oracle.getAddress(), await cusdt.getAddress(), 50)) as AgentMandate;
-    cusdtAddr = await cusdt.getAddress();
+    _cusdtAddr = await cusdt.getAddress();
     oracleAddr = await oracle.getAddress();
     poolAddr = await pool.getAddress();
     pool2Addr = await pool2.getAddress();

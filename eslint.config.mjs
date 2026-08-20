@@ -21,6 +21,8 @@ export default tseslint.config(
       "**/node_modules/**",
       "types/**",
       "frontend/**",
+      "ajo/**",
+      "scripts/**",
       "tokenops/**",
       "*.env",
       "*.log",

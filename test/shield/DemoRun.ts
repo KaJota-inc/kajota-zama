@@ -149,7 +149,6 @@ describe("Kajota Shield — demo scenario → run.json", function () {
       timeline,
     };
     writeFileSync("scripts/shield/run.json", JSON.stringify(out, null, 2));
-    // eslint-disable-next-line no-console
     console.log("wrote scripts/shield/run.json — paused:", paused, "steps:", timeline.length);
   });
 });
