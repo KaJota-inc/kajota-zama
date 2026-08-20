@@ -29,6 +29,8 @@ export const POOL_ABI = [
   "function harvestYield(uint64 amount)",
   "function commitRound(bytes32 commitment, uint256 revealWindow)",
   "function revealSeed(bytes32 seed)",
+  "function tallyDraw(uint256 count)",
+  "function tallyComplete() view returns (bool)",
   "function runDraw(uint256 count)",
   "function disclosePublicTotal()",
   "event Deposited(address indexed user)",

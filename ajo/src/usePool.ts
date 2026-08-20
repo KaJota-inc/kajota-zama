@@ -206,8 +206,18 @@ export function usePool(POOL: string = POOL_ADDRESS) {
   const draw = () =>
     run("draw", async () => {
       const c = new ethers.Contract(POOL, POOL_ABI, signer);
-      await (await c.runDraw(count > 0n ? count : 20n, { gasLimit: FHE_GAS })).wait();
-      say("✓ Draw run — the winner is flagged (encrypted). Claims are open.");
+      // Contract requires tallyDraw (time-weighted odds) to finish before runDraw. Both are
+      // paginated one saver per tx to stay under the FHEVM HCU depth limit.
+      let guard = 0;
+      while (!(await c.tallyComplete()) && guard++ < 60) {
+        await (await c.tallyDraw(1n, { gasLimit: FHE_GAS })).wait();
+        say("✓ Tallied a saver's time-weighted odds.");
+      }
+      guard = 0;
+      while (!(await c.drawComplete()) && guard++ < 60) {
+        await (await c.runDraw(1n, { gasLimit: FHE_GAS })).wait();
+      }
+      say("✓ Winner drawn (encrypted) — collecting is open.");
     });
 
   const close = () =>
