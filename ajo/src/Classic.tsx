@@ -128,11 +128,24 @@ export function Classic({ p }: { p: PoolState }) {
             <p className="muted">Ask for more than you have and it just gives you your balance — it never errors, never leaks the number.</p>
           </section>
 
+          {!p.isOwner && (
+            <section className="card">
+              <h2>
+                <span className="step">🎲</span> Run the draw (the spin)
+              </h2>
+              <p className="hint">
+                Only a circle’s <b>host</b> runs the draw — and you’re a saver here, not the host of this pool. To spin
+                one yourself, open <b>Circles</b> (top) → <b>＋ Create a circle</b>. You become the host, and the draw
+                controls appear right here.
+              </p>
+            </section>
+          )}
+
           {p.isOwner && (
-            <details className="card host">
+            <details className="card host" open>
               <summary>
-                <span className="host-title">⚙️ Host controls</span>
-                <span className="host-sub">run a draw yourself — for the demo</span>
+                <span className="host-title">🎲 Run the draw (the spin)</span>
+                <span className="host-sub">you’re the host of this circle</span>
               </summary>
               <p className="hint">
                 Normally a keeper does this automatically each round. For a live demo you can step a full draw by hand:
