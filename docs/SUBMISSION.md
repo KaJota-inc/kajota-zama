@@ -36,8 +36,9 @@ confidential PoolTogether, three exhibits show what the primitive makes possible
   _safe autonomous agent_ save into a pool without exposing balances. The agent bridge is live on-chain.
 - **Three ways history pooled money** — the same encrypted rail also runs a sealed-bid **chit fund** (winner = a
   homomorphic argmax over encrypted bids) and a survivorship **tontine** (dividend grows as members exit; banned in 1905
-  for opacity). Both new contracts, mock-FHE tested, deployed + Etherscan-verified on Sepolia. Live at
-  [/#mechanisms](https://ajo-confidential.vercel.app/#mechanisms).
+  for opacity). Both are **fully playable pools** — deposit, bid or join, and settle in your wallet — each with a
+  plain-language explainer and an interactive 3D view. Live at [/#chit](https://ajo-confidential.vercel.app/#chit) ·
+  [/#tontine](https://ajo-confidential.vercel.app/#tontine) (Etherscan-verified, mock-FHE tested).
 
 ## Verifiable now (Sepolia)
 

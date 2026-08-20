@@ -158,9 +158,12 @@ verifiable — so the same encrypted cUSDT rail can run mechanisms history had t
 Why this belongs to FHE specifically: a **sealed-bid auction is the canonical "compute a winner over secret inputs"
 problem** — the thing FHE is uniquely for — and a **tontine's** whole historical failure was opacity. Both are new
 contracts (`contracts/ConfidentialChit.sol`, `contracts/ConfidentialTontine.sol`), reuse the proven ERC-7984 deposit /
-`_credit` / withdraw scaffolding, pass mock-FHE tests (`test/mechanisms/`), and are Etherscan-verified with live seed
-state. Browse them at **[/#mechanisms](https://ajo-confidential.vercel.app/#mechanisms)**. This is an exhibit of _what
-the primitive makes possible_ — the confidential PoolTogether above remains the submission.
+`_credit` / withdraw scaffolding, pass mock-FHE tests (`test/mechanisms/`), and are Etherscan-verified. Both are **fully
+playable pools** — deposit, bid or join, and settle in your own wallet — each with a plain-language "how it works"
+explainer and an **interactive 3D view** ([chit fund](https://ajo-confidential.vercel.app/#chit) ·
+[tontine](https://ajo-confidential.vercel.app/#tontine); gallery at
+[/#mechanisms](https://ajo-confidential.vercel.app/#mechanisms)). This is an exhibit of _what the primitive makes
+possible_ — the confidential PoolTogether above remains the submission.
 
 ---
 
