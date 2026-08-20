@@ -5,6 +5,7 @@ import { Game } from "./Game";
 import { Evidence } from "./Evidence";
 import { Shield } from "./Shield";
 import { Circles } from "./Circles";
+import { Mechanisms } from "./Mechanisms";
 import { POOL_ADDRESS } from "./config";
 import { allCircles } from "./circleStore";
 
@@ -19,6 +20,7 @@ export default function App() {
   }, []);
   if (route === "#evidence") return <Evidence />;
   if (route === "#shield") return <Shield />;
+  if (route === "#mechanisms") return <Mechanisms />;
   return <Shell />;
 }
 
@@ -88,6 +90,9 @@ function Shell() {
           )}
           <a className="link" href="#shield">
             🛡️ Shield
+          </a>
+          <a className="link" href="#mechanisms">
+            History
           </a>
           <a className="link" href="#evidence">
             Evidence ↗

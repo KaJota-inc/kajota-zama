@@ -10,6 +10,24 @@ export const CUSDT_ABI = [
 
 export const ORACLE_ABI = ["function reportCount(bytes32) view returns (uint32)"] as const;
 
+// Sealed-bid chit fund (bidding hui) — public state for the showcase.
+export const CHIT_ABI = [
+  "function pot() view returns (uint64)",
+  "function phase() view returns (uint8)",
+  "function roundId() view returns (uint256)",
+  "function membersCount() view returns (uint256)",
+  "function biddersCount() view returns (uint256)",
+  "function settleComplete() view returns (bool)",
+] as const;
+
+// Confidential tontine (survivorship pool) — public state for the showcase.
+export const TONTINE_ABI = [
+  "function activeCount() view returns (uint256)",
+  "function accDividend() view returns (uint64)",
+  "function totalDistributed() view returns (uint64)",
+  "function membersCount() view returns (uint256)",
+] as const;
+
 export const POOL_ABI = [
   "function balanceOf(address user) view returns (bytes32)",
   "function totalPooled() view returns (bytes32)",

@@ -26,6 +26,11 @@ export const ORACLE_ADDRESS = "0x14C93328e19e602Fd6d63bcC90053eB8b7537BAc";
 // agents may save into the circle under an encrypted spend mandate.
 export const MANDATE_ADDRESS = "0x5BA600798E834E12b48648488C7eb12d92e0a32c";
 
+// Three ways history pooled money, each a different confidential-pool mechanism on the same cUSDT.
+// Premium Bonds (1956) = the random-draw base pool; the other two are new FHE contracts.
+export const CHIT_ADDRESS = "0x76Ae6C2C20e3793AFB2b0982b60B147d2DA39B3b"; // sealed-bid chit fund
+export const TONTINE_ADDRESS = "0x0C60677B8a486Ff4f2C2ee50041415B969041c5B"; // survivorship tontine
+
 // Confidential esusu circles — a platform of prize pools, each rated by the trust circle.
 export const CIRCLES: { name: string; theme: string; address: string }[] = [
   { name: "Weekly Àjọ", theme: "The main weekly savings draw", address: POOL_ADDRESS },
