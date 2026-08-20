@@ -7,37 +7,62 @@ import { PHASES } from "./config";
 
 const GOLD = "#f5c542";
 const TEAL = "#39d0c8";
+const ASH = new THREE.Color("#38332b");
+const GOLDC = new THREE.Color(GOLD);
+const TEALC = new THREE.Color(TEAL);
 
 // ── One encrypted "ticket" crystal orbiting the vault ─────────────────────────────────────
-function Ticket({ angle, radius, winner, drawing }: { angle: number; radius: number; winner: boolean; drawing: boolean }) {
+// During the draw the crystals accelerate and spiral inward. On reveal the losers are
+// eliminated — drained of colour, sinking and fading into the dark — while the sole winner erupts.
+function Ticket({ angle, radius, winner, drawing, revealed }: { angle: number; radius: number; winner: boolean; drawing: boolean; revealed: boolean }) {
   const ref = useRef<THREE.Mesh>(null);
   const t0 = useMemo(() => Math.random() * 10, []);
+  const eliminated = revealed && !winner;
   useFrame((state) => {
     const m = ref.current;
     if (!m) return;
-    const spin = drawing ? 6 : 1;
+    const mat = m.material as THREE.MeshStandardMaterial;
+
+    if (eliminated) {
+      mat.color.lerp(ASH, 0.05);
+      mat.emissive.lerp(ASH, 0.05);
+      mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.04, 0.06);
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, 0.06, 0.05);
+      m.position.y = THREE.MathUtils.lerp(m.position.y, -4.2, 0.03);
+      m.scale.lerp(new THREE.Vector3(0.3, 0.3, 0.3), 0.05);
+      m.rotation.x += 0.004;
+      m.rotation.y += 0.006;
+      return;
+    }
+
+    const spin = drawing ? 7 : 1;
+    const pull = drawing ? 0.6 : 1; // spiral inward under tension
     const a = angle + state.clock.elapsedTime * 0.15 * spin;
-    m.position.x = Math.cos(a) * radius;
-    m.position.z = Math.sin(a) * radius;
-    m.position.y = Math.sin(state.clock.elapsedTime * 0.8 + t0) * 0.35 + (winner ? 0.6 : 0);
+    m.position.x = Math.cos(a) * radius * pull;
+    m.position.z = Math.sin(a) * radius * pull;
+    m.position.y = Math.sin(state.clock.elapsedTime * (drawing ? 2.4 : 0.8) + t0) * (drawing ? 0.6 : 0.35) + (winner ? 1.0 : 0);
     m.rotation.x += 0.01 * spin;
     m.rotation.y += 0.012 * spin;
-    const target = winner ? 1.9 : 1;
-    m.scale.lerp(new THREE.Vector3(target, target, target), 0.08);
+    const target = winner ? 2.5 : 1;
+    m.scale.lerp(new THREE.Vector3(target, target, target), 0.09);
+    if (winner) {
+      mat.color.lerp(GOLDC, 0.12);
+      mat.emissive.lerp(GOLDC, 0.12);
+      mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 2.2, 0.08);
+      mat.opacity = 1;
+    } else {
+      // restore any crystal that was eliminated in a previous round
+      mat.color.lerp(TEALC, 0.1);
+      mat.emissive.lerp(TEALC, 0.1);
+      mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.5, 0.1);
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity, 0.92, 0.1);
+    }
   });
   return (
     <mesh ref={ref}>
       <icosahedronGeometry args={[0.42, 0]} />
-      <meshStandardMaterial
-        color={winner ? GOLD : TEAL}
-        emissive={winner ? GOLD : TEAL}
-        emissiveIntensity={winner ? 1.4 : 0.5}
-        metalness={0.6}
-        roughness={0.15}
-        transparent
-        opacity={0.92}
-      />
-      {winner && <Sparkles count={30} scale={2.4} size={4} speed={0.6} color={GOLD} />}
+      <meshStandardMaterial color={TEAL} emissive={TEAL} emissiveIntensity={0.5} metalness={0.6} roughness={0.15} transparent opacity={0.92} />
+      {winner && <Sparkles count={60} scale={3.2} size={5} speed={0.9} color={GOLD} />}
     </mesh>
   );
 }
@@ -99,22 +124,34 @@ function EnclosingRing({ drawing }: { drawing: boolean }) {
   );
 }
 
+function DrawLight({ drawing }: { drawing: boolean }) {
+  const ref = useRef<THREE.PointLight>(null);
+  useFrame((s) => {
+    if (!ref.current) return;
+    const pulse = drawing ? 60 + Math.sin(s.clock.elapsedTime * 9) * 40 : 0;
+    ref.current.intensity = THREE.MathUtils.lerp(ref.current.intensity, pulse, 0.2);
+  });
+  return <pointLight ref={ref} position={[0, 1.5, 3]} color="#ff2d1a" intensity={0} />;
+}
+
 function Scene({ tickets, winnerIdx, drawing, jackpot }: { tickets: number; winnerIdx: number; drawing: boolean; jackpot: bigint }) {
   const radius = 3.2;
+  const revealed = winnerIdx >= 0 && !drawing;
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[6, 8, 6]} intensity={120} color={GOLD} />
-      <pointLight position={[-6, -4, -6]} intensity={80} color={TEAL} />
-      <Stars radius={60} depth={40} count={2500} factor={4} fade speed={1} />
+      <ambientLight intensity={drawing ? 0.18 : 0.5} />
+      <pointLight position={[6, 8, 6]} intensity={drawing ? 40 : 120} color={GOLD} />
+      <pointLight position={[-6, -4, -6]} intensity={drawing ? 20 : 80} color={TEAL} />
+      <DrawLight drawing={drawing} />
+      <Stars radius={60} depth={40} count={2500} factor={4} fade speed={drawing ? 3 : 1} />
       <EnclosingRing drawing={drawing} />
       <Float speed={1.4} rotationIntensity={0.3} floatIntensity={0.6}>
         <Vault jackpot={jackpot} drawing={drawing} />
       </Float>
       {Array.from({ length: tickets }).map((_, i) => (
-        <Ticket key={i} angle={(i / tickets) * Math.PI * 2} radius={radius} winner={winnerIdx === i} drawing={drawing} />
+        <Ticket key={i} angle={(i / tickets) * Math.PI * 2} radius={radius} winner={winnerIdx === i} drawing={drawing} revealed={revealed} />
       ))}
-      <OrbitControls autoRotate autoRotateSpeed={0.6} enablePan={false} minDistance={5} maxDistance={16} />
+      <OrbitControls autoRotate autoRotateSpeed={drawing ? 2.4 : 0.6} enablePan={false} minDistance={5} maxDistance={16} />
     </>
   );
 }
@@ -125,20 +162,24 @@ function Scene({ tickets, winnerIdx, drawing, jackpot }: { tickets: number; winn
 export function Game({ p, circleName, onExit }: { p: PoolState; circleName?: string; onExit?: () => void }) {
   const [drawing, setDrawing] = useState(false);
   const [winnerIdx, setWinnerIdx] = useState(-1);
+  const [flash, setFlash] = useState(false);
   const tickets = Math.max(Number(p.count), 6);
 
   const spin = async () => {
     setWinnerIdx(-1);
-    setDrawing(true);
+    setFlash(false);
+    setDrawing(true); // suspense: the world dims, tickets accelerate and spiral in
     if (p.phase === 2 && p.connected) void p.claim(); // fire the real winner payout too
     window.setTimeout(() => {
       setWinnerIdx(Math.floor(Math.random() * tickets));
-      setDrawing(false);
-    }, 2600);
+      setDrawing(false); // the cull: losers are eliminated, one survivor erupts
+      setFlash(true);
+      window.setTimeout(() => setFlash(false), 900);
+    }, 2800);
   };
 
   return (
-    <div className="game dive-in">
+    <div className={`game dive-in${drawing ? " drawing" : ""}`}>
       {circleName && (
         <div className="game-topbar">
           {onExit && (
@@ -154,6 +195,10 @@ export function Game({ p, circleName, onExit }: { p: PoolState; circleName?: str
       <Canvas camera={{ position: [0, 2.5, 9], fov: 50 }} style={{ background: "transparent" }}>
         <Scene tickets={tickets} winnerIdx={winnerIdx} drawing={drawing} jackpot={p.jackpot} />
       </Canvas>
+
+      <div className={`game-drama${drawing ? " charging" : ""}`} />
+      <div className={`reveal-flash${flash ? " on" : ""}`} />
+      {drawing && <div className="draw-caption">The draw is closing in…</div>}
 
       <div className="hud">
         <div className="hud-status">
@@ -183,14 +228,14 @@ export function Game({ p, circleName, onExit }: { p: PoolState; circleName?: str
                 {p.busy === "reveal" ? "Decrypting…" : p.myBalance === null ? "Reveal balance" : `You: ${fromUnits(p.myBalance)}`}
               </button>
               <button className="gold" disabled={drawing} onClick={spin}>
-                {drawing ? "Drawing…" : "🎲 Spin the draw"}
+                {drawing ? "Culling…" : "🎲 Spin the draw"}
               </button>
             </>
           )}
         </div>
 
         {winnerIdx >= 0 && !drawing && (
-          <div className="winner-banner">🎉 A winner was drawn — reveal your balance to see if it's you (only you can).</div>
+          <div className="winner-banner">☠ One saver remains — reveal your balance to see if it's you (only you can).</div>
         )}
         {p.log[0] && <div className="hud-log">{p.log[0]}</div>}
       </div>
