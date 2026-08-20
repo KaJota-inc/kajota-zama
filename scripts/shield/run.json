@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-19T23:00:40.684Z",
+  "generatedAt": "2026-08-20T16:05:03.945Z",
   "contracts": {
-    "AgentMandate": "0x739Ed005eeb3857DfD84d87C8429B1Af26367e89",
-    "FraudOracle": "0x2E3Cdb1C8203A48061cA141Df536d1cC8823a663",
-    "ConfidentialUSDT": "0x65d38310D76CAF33DeAb1B41325Df60d96c06EBA"
+    "AgentMandate": "0x06EA38FEED2cA8568eDc9429B7ceBdbEe767b595",
+    "FraudOracle": "0xA90827E65E3E5041e253ddE30f1f4FFCb4d4bAcA",
+    "ConfidentialUSDT": "0x739Ed005eeb3857DfD84d87C8429B1Af26367e89"
   },
   "agent": "0x2F76906b39a484cC43Cf911ffd9893F52258E4C2",
   "principal": "0xE45E6b01742CDB4e3aECFEb364b2967415C551c1",
