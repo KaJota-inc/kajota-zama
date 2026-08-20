@@ -26,7 +26,14 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
     const o = (await O.deploy()) as FraudOracle;
     const M = await ethers.getContractFactory("AgentMandate");
     const m = (await M.deploy(await o.getAddress(), await t.getAddress(), THRESHOLD)) as AgentMandate;
-    return { t, o, m, cusdtAddr: await t.getAddress(), oracleAddr: await o.getAddress(), mandateAddr: await m.getAddress() };
+    return {
+      t,
+      o,
+      m,
+      cusdtAddr: await t.getAddress(),
+      oracleAddr: await o.getAddress(),
+      mandateAddr: await m.getAddress(),
+    };
   }
 
   async function pay(merchant: HardhatEthersSigner, amount: bigint | number) {
@@ -63,7 +70,9 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
     // encrypted 1,000 cap; allow-list two merchants
     const cap = await fhevm.createEncryptedInput(mandateAddr, principal.address).add64(1000).encrypt();
     await (
-      await mandate.connect(principal).registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 20)
+      await mandate
+        .connect(principal)
+        .registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 20)
     ).wait();
     await (await mandate.connect(principal).setMerchant(agent.address, cleanM.address, true)).wait();
     await (await mandate.connect(principal).setMerchant(agent.address, riskyM.address, true)).wait();
@@ -104,7 +113,9 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
   it("kill switch: a paused agent cannot spend", async function () {
     await (await mandate.connect(principal).setPaused(agent.address, true, "manual")).wait();
     const enc = await fhevm.createEncryptedInput(mandateAddr, agent.address).add64(100).encrypt();
-    await expect(mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof)).to.be.revertedWithCustomError(mandate, "IsPaused");
+    await expect(
+      mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof),
+    ).to.be.revertedWithCustomError(mandate, "IsPaused");
   });
 
   it("guardian (anomaly monitor) can trip the kill switch but not resume", async function () {
@@ -112,19 +123,28 @@ describe("Kajota Shield — mandate × oracle × confidential rail", function ()
     // monitor trips the switch on a detected anomaly
     await (await mandate.connect(monitor).setPaused(agent.address, true, "velocity anomaly")).wait();
     const enc = await fhevm.createEncryptedInput(mandateAddr, agent.address).add64(100).encrypt();
-    await expect(mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof)).to.be.revertedWithCustomError(mandate, "IsPaused");
+    await expect(
+      mandate.connect(agent).checkAndSpend(cleanM.address, enc.handles[0], enc.inputProof),
+    ).to.be.revertedWithCustomError(mandate, "IsPaused");
     // but only the human principal may resume
-    await expect(mandate.connect(monitor).setPaused(agent.address, false, "clear")).to.be.revertedWithCustomError(mandate, "NotGuardian");
+    await expect(mandate.connect(monitor).setPaused(agent.address, false, "clear")).to.be.revertedWithCustomError(
+      mandate,
+      "NotGuardian",
+    );
     await (await mandate.connect(principal).setPaused(agent.address, false, "reviewed")).wait();
   });
 
   it("rejects a merchant that isn't on the allow-list", async function () {
     const enc = await fhevm.createEncryptedInput(mandateAddr, agent.address).add64(100).encrypt();
-    await expect(mandate.connect(agent).checkAndSpend(bank.address, enc.handles[0], enc.inputProof)).to.be.revertedWithCustomError(mandate, "MerchantNotAllowed");
+    await expect(
+      mandate.connect(agent).checkAndSpend(bank.address, enc.handles[0], enc.inputProof),
+    ).to.be.revertedWithCustomError(mandate, "MerchantNotAllowed");
   });
 
   it("only vetted members can contribute to the oracle", async function () {
     const score = await fhevm.createEncryptedInput(oracleAddr, agent.address).add64(10).encrypt();
-    await expect(oracle.connect(agent).report(idOf(cleanM.address), score.handles[0], score.inputProof)).to.be.revertedWithCustomError(oracle, "NotMember");
+    await expect(
+      oracle.connect(agent).report(idOf(cleanM.address), score.handles[0], score.inputProof),
+    ).to.be.revertedWithCustomError(oracle, "NotMember");
   });
 });

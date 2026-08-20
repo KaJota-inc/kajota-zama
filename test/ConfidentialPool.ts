@@ -4,13 +4,19 @@ import { ConfidentialPool, ConfidentialUSDT } from "../types";
 import { expect } from "chai";
 import { FhevmType } from "@fhevm/hardhat-plugin";
 
-type Signers = { owner: HardhatEthersSigner; alice: HardhatEthersSigner; bob: HardhatEthersSigner; carol: HardhatEthersSigner };
+type Signers = {
+  owner: HardhatEthersSigner;
+  alice: HardhatEthersSigner;
+  bob: HardhatEthersSigner;
+  carol: HardhatEthersSigner;
+};
 
 const TWO_POW_32 = 1n << 32n;
 const TRANSFER_AND_CALL = "confidentialTransferAndCall(address,bytes32,bytes,bytes)";
 
 function drawTarget(roundId: bigint, seed: string, totalWeight: bigint): bigint {
-  const r = BigInt(ethers.keccak256(ethers.solidityPacked(["uint256", "bytes32"], [roundId, seed]))) & (TWO_POW_32 - 1n);
+  const r =
+    BigInt(ethers.keccak256(ethers.solidityPacked(["uint256", "bytes32"], [roundId, seed]))) & (TWO_POW_32 - 1n);
   return (r * totalWeight) / TWO_POW_32;
 }
 function winnerIndex(target: bigint, weights: bigint[]): number {
@@ -117,7 +123,9 @@ describe("ConfidentialPool v3 — Àjọ time-weighted single-winner draw", func
     expect(await pool.jackpot()).to.eq(500n);
   });
   it("cannot commit with an empty pool or zero jackpot", async function () {
-    await expect(pool.connect(s.owner).commitRound(ethers.keccak256(ethers.id("x")), 3600)).to.be.revertedWithCustomError(pool, "EmptyPool");
+    await expect(
+      pool.connect(s.owner).commitRound(ethers.keccak256(ethers.id("x")), 3600),
+    ).to.be.revertedWithCustomError(pool, "EmptyPool");
   });
 
   // ── Time-weighted single-winner draw ────────────────────────────────────────────────────
@@ -237,7 +245,8 @@ describe("ConfidentialPool v3 — Àjọ time-weighted single-winner draw", func
     await (await pool.connect(s.owner).commitRound(ethers.keccak256(ethers.id("lock")), 3600)).wait();
     await cusdt.connect(s.bob).faucet(1_000);
     const enc = await fhevm.createEncryptedInput(cusdtAddr, s.bob.address).add64(1_000).encrypt();
-    await expect(cusdt.connect(s.bob)[TRANSFER_AND_CALL](poolAddr, enc.handles[0], enc.inputProof, "0x")).to.be.reverted;
+    await expect(cusdt.connect(s.bob)[TRANSFER_AND_CALL](poolAddr, enc.handles[0], enc.inputProof, "0x")).to.be
+      .reverted;
     const wd = await fhevm.createEncryptedInput(poolAddr, s.alice.address).add64(400).encrypt();
     await (await pool.connect(s.alice).withdraw(wd.handles[0], wd.inputProof)).wait();
     expect(await poolBalance(s.alice)).to.eq(600n);

@@ -114,13 +114,9 @@ export function usePool(POOL: string = POOL_ADDRESS) {
       const inst = await getFhevmInstance();
       const { handle, proof } = await encryptAmount(inst, CUSDT_ADDRESS, address!, toUnits(amount));
       const c = new ethers.Contract(CUSDT_ADDRESS, CUSDT_ABI, signer);
-      const tx = await c["confidentialTransferAndCall(address,bytes32,bytes,bytes)"](
-        POOL,
-        handle,
-        proof,
-        "0x",
-        { gasLimit: FHE_GAS },
-      );
+      const tx = await c["confidentialTransferAndCall(address,bytes32,bytes,bytes)"](POOL, handle, proof, "0x", {
+        gasLimit: FHE_GAS,
+      });
       say(`Deposit ${short(tx.hash)} … (encrypted)`);
       await tx.wait();
       say(`✓ Deposited ${amount} cUSDT (encrypted).`);

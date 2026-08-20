@@ -12,7 +12,8 @@ function analyze(history: { ts: number; merchant: string }[], seen: Set<string>,
   const newM = [...merchants].filter((m) => !seen.has(m));
   const reasons: string[] = [];
   if (recent.length > cfg.maxSpends) reasons.push(`velocity ${recent.length} > ${cfg.maxSpends} in ${cfg.windowSec}s`);
-  if (newM.length > cfg.maxNewMerchants) reasons.push(`${newM.length} new merchants > ${cfg.maxNewMerchants} in ${cfg.windowSec}s`);
+  if (newM.length > cfg.maxNewMerchants)
+    reasons.push(`${newM.length} new merchants > ${cfg.maxNewMerchants} in ${cfg.windowSec}s`);
   return { trip: reasons.length > 0, reasons };
 }
 
@@ -51,12 +52,17 @@ describe("Kajota Shield — demo scenario → run.json", function () {
 
     const cap = await fhevm.createEncryptedInput(mandateAddr, principal.address).add64(CAP).encrypt();
     await (
-      await mandate.connect(principal).registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 50)
+      await mandate
+        .connect(principal)
+        .registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 50)
     ).wait();
     await (await mandate.connect(principal).setGuardian(agent.address, monitor.address)).wait();
     for (const m of merchants)
       await (await mandate.connect(principal).setMerchant(agent.address, m.s.address, true)).wait();
-    const score = await fhevm.createEncryptedInput(await oracle.getAddress(), bank.address).add64(80).encrypt();
+    const score = await fhevm
+      .createEncryptedInput(await oracle.getAddress(), bank.address)
+      .add64(80)
+      .encrypt();
     await (await oracle.connect(bank).report(idOf(merchants[2].s.address), score.handles[0], score.inputProof)).wait();
 
     const plan: [number, number][] = [

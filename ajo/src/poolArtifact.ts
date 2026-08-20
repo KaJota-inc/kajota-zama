@@ -6,16 +6,16 @@ export const POOL_BYTECODE =
 
 export const POOL_DEPLOY_ABI = [
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "contract IERC7984",
-        "name": "asset_",
-        "type": "address"
-      }
+        internalType: "contract IERC7984",
+        name: "asset_",
+        type: "address",
+      },
     ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    stateMutability: "nonpayable",
+    type: "constructor",
   },
   "function harvestYield(uint64 amount)",
-  "function setDepositor(address gateway, bool allowed)"
+  "function setDepositor(address gateway, bool allowed)",
 ] as const;

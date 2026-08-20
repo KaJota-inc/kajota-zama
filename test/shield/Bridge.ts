@@ -12,15 +12,25 @@ const idOf = (a: string) => ethers.solidityPackedKeccak256(["address"], [a]);
 
 describe("Àjọ × Shield — agent-native confidential PoolTogether", function () {
   let bank: HardhatEthersSigner, principal: HardhatEthersSigner, agent: HardhatEthersSigner;
-  let cusdt: ConfidentialUSDT, oracle: FraudOracle, pool: ConfidentialPool, pool2: ConfidentialPool, mandate: AgentMandate;
+  let cusdt: ConfidentialUSDT,
+    oracle: FraudOracle,
+    pool: ConfidentialPool,
+    pool2: ConfidentialPool,
+    mandate: AgentMandate;
   let cusdtAddr: string, oracleAddr: string, poolAddr: string, pool2Addr: string, mandateAddr: string;
 
   async function setup() {
     cusdt = (await (await ethers.getContractFactory("ConfidentialUSDT")).deploy()) as ConfidentialUSDT;
     oracle = (await (await ethers.getContractFactory("FraudOracle")).deploy()) as FraudOracle;
-    pool = (await (await ethers.getContractFactory("ConfidentialPool")).deploy(await cusdt.getAddress())) as ConfidentialPool;
-    pool2 = (await (await ethers.getContractFactory("ConfidentialPool")).deploy(await cusdt.getAddress())) as ConfidentialPool;
-    mandate = (await (await ethers.getContractFactory("AgentMandate")).deploy(await oracle.getAddress(), await cusdt.getAddress(), 50)) as AgentMandate;
+    pool = (await (
+      await ethers.getContractFactory("ConfidentialPool")
+    ).deploy(await cusdt.getAddress())) as ConfidentialPool;
+    pool2 = (await (
+      await ethers.getContractFactory("ConfidentialPool")
+    ).deploy(await cusdt.getAddress())) as ConfidentialPool;
+    mandate = (await (
+      await ethers.getContractFactory("AgentMandate")
+    ).deploy(await oracle.getAddress(), await cusdt.getAddress(), 50)) as AgentMandate;
     cusdtAddr = await cusdt.getAddress();
     oracleAddr = await oracle.getAddress();
     poolAddr = await pool.getAddress();
@@ -36,7 +46,11 @@ describe("Àjọ × Shield — agent-native confidential PoolTogether", function
     await (await cusdt.connect(principal).setOperator(mandateAddr, MAX_DEADLINE)).wait();
 
     const cap = await fhevm.createEncryptedInput(mandateAddr, principal.address).add64(1000).encrypt();
-    await (await mandate.connect(principal).registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 50)).wait();
+    await (
+      await mandate
+        .connect(principal)
+        .registerAgent(agent.address, cap.handles[0], cap.inputProof, 2_000_000_000, 3600, 50)
+    ).wait();
     await (await mandate.connect(principal).setMerchant(agent.address, poolAddr, true)).wait();
     await (await mandate.connect(principal).setMerchant(agent.address, pool2Addr, true)).wait();
 

@@ -1,4 +1,6 @@
-> ⚠️ **SUPERSEDED — old Season-3 "KaJota Confidential Pay" copy.** For the current Àjọ (Confidential PoolTogether, S4) pitch, use **[DEMO.md](./DEMO.md)** (beat-sheet + clean script) and **[SUBMISSION_FORM.md](./SUBMISSION_FORM.md)**. Kept only for reference. Ask and I'll rewrite this as a real-person pitch for Àjọ.
+> ⚠️ **SUPERSEDED — old Season-3 "KaJota Confidential Pay" copy.** For the current Àjọ (Confidential PoolTogether, S4)
+> pitch, use **[DEMO.md](./DEMO.md)** (beat-sheet + clean script) and **[SUBMISSION_FORM.md](./SUBMISSION_FORM.md)**.
+> Kept only for reference. Ask and I'll rewrite this as a real-person pitch for Àjọ.
 
 # Pitch script — real-person video (Zama Builder Track, ≤ 3:00)
 
