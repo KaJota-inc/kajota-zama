@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useMechanism, fromUnits, toUnits } from "./useMechanism";
+import { Tontine3D } from "./Tontine3D";
 import { TONTINE_ABI } from "./abi";
 import { TONTINE_ADDRESS, EXPLORER } from "./config";
 
@@ -11,6 +12,7 @@ export function TontineView() {
   const [s, setS] = useState<{ active: bigint; acc: bigint; dist: bigint; members: bigint; owner: string } | null>(null);
   const [mine, setMine] = useState<{ active: boolean; pending: bigint } | null>(null);
   const [wd, setWd] = useState("");
+  const [mode, setMode] = useState<"overview" | "3d">("overview");
 
   useEffect(() => {
     (async () => {
@@ -43,25 +45,66 @@ export function TontineView() {
 
   return (
     <>
-      <section className="intro">
-        <div className="intro-points">
-          <div>
-            <span className="ip-ico">👥</span>
-            <b>Share the yield</b>
-            <span>Everyone active splits the pooled yield equally, round after round.</span>
-          </div>
-          <div>
-            <span className="ip-ico">📈</span>
-            <b>Survivors earn more</b>
-            <span>Each time a member leaves, the remaining share grows — patience compounds.</span>
-          </div>
-          <div>
-            <span className="ip-ico">🔒</span>
-            <b>Private principal</b>
-            <span>Your balance stays encrypted; only the fair per-survivor rate is public.</span>
-          </div>
+      <div className="mech-head">
+        <div className="toggle sm">
+          <button className={mode === "overview" ? "on" : ""} onClick={() => setMode("overview")}>
+            Overview
+          </button>
+          <button className={mode === "3d" ? "on" : ""} onClick={() => setMode("3d")}>
+            3D survivors
+          </button>
         </div>
-      </section>
+      </div>
+
+      {mode === "3d" ? (
+        <Tontine3D activeCount={Number(s?.active ?? 0n)} members={Number(s?.members ?? 0n)} acc={s?.acc ?? 0n} />
+      ) : (
+        <section className="intro">
+          <div className="intro-points">
+            <div>
+              <span className="ip-ico">👥</span>
+              <b>Share the yield</b>
+              <span>Everyone active splits the pooled yield equally, round after round.</span>
+            </div>
+            <div>
+              <span className="ip-ico">📈</span>
+              <b>Survivors earn more</b>
+              <span>Each time a member leaves, the remaining share grows — patience compounds.</span>
+            </div>
+            <div>
+              <span className="ip-ico">🔒</span>
+              <b>Private principal</b>
+              <span>Your balance stays encrypted; only the fair per-survivor rate is public.</span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <details className="card howto" open>
+        <summary>
+          <span className="host-title">How the tontine works</span>
+          <span className="host-sub">in plain words</span>
+        </summary>
+        <ol className="howto-steps">
+          <li>
+            <b>You join a pool.</b> Add coins and you’re a “survivor.” Your balance stays encrypted — private to you.
+          </li>
+          <li>
+            <b>The yield is shared out.</b> Every payout is split equally among the survivors, round after round.
+          </li>
+          <li>
+            <b>Leavers boost the rest.</b> When someone exits, they stop getting paid — so the same yield is split among
+            fewer people, and each survivor’s share <i>grows</i>.
+          </li>
+          <li>
+            <b>Patience compounds.</b> The longer you stay, the bigger your slice becomes. Your money is always yours to
+            withdraw.
+          </li>
+        </ol>
+        <p className="muted">
+          It’s the opposite of a lottery: nobody “wins” a jackpot — the reward is simply staying in while others leave.
+        </p>
+      </details>
 
       <section className="status">
         <div className="stat">

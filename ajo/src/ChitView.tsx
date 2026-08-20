@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useMechanism, fromUnits, toUnits, shortA } from "./useMechanism";
 import { getFhevmInstance, encryptAmount } from "./fhevm";
+import { Chit3D } from "./Chit3D";
 import { CHIT_ABI } from "./abi";
 import { CHIT_ADDRESS, EXPLORER } from "./config";
 
@@ -15,6 +16,7 @@ export function ChitView() {
   const [s, setS] = useState<{ pot: bigint; phase: number; round: bigint; members: bigint; bidders: bigint; tally: boolean; settled: boolean; owner: string } | null>(null);
   const [bid, setBid] = useState("300");
   const [wd, setWd] = useState("");
+  const [mode, setMode] = useState<"overview" | "3d">("overview");
 
   useEffect(() => {
     (async () => {
@@ -58,25 +60,67 @@ export function ChitView() {
 
   return (
     <>
-      <section className="intro">
-        <div className="intro-points">
-          <div>
-            <span className="ip-ico">🔨</span>
-            <b>Bid, don’t gamble</b>
-            <span>Each round is a sealed-bid auction — the highest bidder takes the pot now, at a discount.</span>
-          </div>
-          <div>
-            <span className="ip-ico">🤝</span>
-            <b>Patience pays</b>
-            <span>The discount the winner forgoes is split among everyone else. Wait, and you earn it.</span>
-          </div>
-          <div>
-            <span className="ip-ico">🔒</span>
-            <b>Bids stay secret</b>
-            <span>Your bid never leaves ciphertext; the winner is found by a homomorphic argmax.</span>
-          </div>
+      <div className="mech-head">
+        <div className="toggle sm">
+          <button className={mode === "overview" ? "on" : ""} onClick={() => setMode("overview")}>
+            Overview
+          </button>
+          <button className={mode === "3d" ? "on" : ""} onClick={() => setMode("3d")}>
+            3D auction
+          </button>
         </div>
-      </section>
+      </div>
+
+      {mode === "3d" ? (
+        <Chit3D pot={s?.pot ?? 0n} bidders={Number(s?.bidders ?? 0n)} settled={!!s?.settled} />
+      ) : (
+        <section className="intro">
+          <div className="intro-points">
+            <div>
+              <span className="ip-ico">🔨</span>
+              <b>Bid, don’t gamble</b>
+              <span>Each round is a sealed-bid auction — the highest bidder takes the pot now, at a discount.</span>
+            </div>
+            <div>
+              <span className="ip-ico">🤝</span>
+              <b>Patience pays</b>
+              <span>The discount the winner forgoes is split among everyone else. Wait, and you earn it.</span>
+            </div>
+            <div>
+              <span className="ip-ico">🔒</span>
+              <b>Bids stay secret</b>
+              <span>Your bid never leaves ciphertext; the winner is found by a homomorphic argmax.</span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <details className="card howto" open>
+        <summary>
+          <span className="host-title">How the chit fund works</span>
+          <span className="host-sub">in plain words</span>
+        </summary>
+        <ol className="howto-steps">
+          <li>
+            <b>Everyone chips in.</b> Members add coins to a shared pot. Your amount is encrypted — private to you.
+          </li>
+          <li>
+            <b>Each round you bid in secret.</b> Your bid is the discount you’ll accept to take the whole pot now. Bids
+            are sealed — nobody, not even us, can read them.
+          </li>
+          <li>
+            <b>The keenest bidder wins.</b> The app finds the highest bid <i>without ever unlocking any bid</i>, and that
+            person takes the pot minus their bid.
+          </li>
+          <li>
+            <b>Everyone else shares the discount.</b> The amount the winner gave up is split among the other members.
+          </li>
+        </ol>
+        <p className="muted">
+          Why bid? Need cash now → bid high to win early. Can wait → you collect the discounts others pay, like earning
+          interest.
+        </p>
+      </details>
 
       <section className="status">
         <div className="stat">

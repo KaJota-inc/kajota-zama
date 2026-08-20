@@ -1313,3 +1313,55 @@ details.host .row:last-child {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ── Mechanism views: 2D/3D toggle + how-it-works ────────────────────────── */
+.mech-head {
+  display: flex;
+  justify-content: center;
+  margin: 22px 0 4px;
+}
+.card.howto {
+  padding: 0;
+}
+.card.howto > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 18px 22px;
+}
+.card.howto > summary::-webkit-details-marker {
+  display: none;
+}
+.card.howto > summary::after {
+  content: "▸";
+  margin-left: auto;
+  color: var(--mute-2);
+  transition: transform 0.15s;
+}
+.card.howto[open] > summary::after {
+  transform: rotate(90deg);
+}
+.howto-steps {
+  margin: 0;
+  padding: 0 26px 4px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.howto-steps li {
+  color: var(--mute);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.howto-steps li b {
+  color: var(--ink);
+}
+.howto-steps li i {
+  color: var(--gold);
+  font-style: italic;
+}
+.card.howto > .muted {
+  padding: 4px 26px 20px;
+}
