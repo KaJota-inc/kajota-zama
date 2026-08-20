@@ -31,6 +31,7 @@ export const CIRCLES: { name: string; theme: string; address: string }[] = [
   { name: "Weekly Àjọ", theme: "The main weekly savings draw", address: POOL_ADDRESS },
   { name: "Agent Treasury", theme: "A circle an AI assistant can save into for you", address: "0x2C6F01FcA31578b68fe01dfb299e34114fe6a626" },
   { name: "Quick Draw", theme: "Fast rounds, small amounts", address: "0x99A2c50A6Cc6484EA98e70873888d4AC913e6b65" },
+  { name: "Demo Round", theme: "A finished round — a winner has been drawn", address: "0x708c5db121098974CBe0Eac770FCC15C182217D1" },
 ];
 
 // Real on-chain proof set on the canonical pool (the "no mocked data" evidence trail).
