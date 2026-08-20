@@ -169,7 +169,7 @@ export function Game({ p, circleName, onExit }: { p: PoolState; circleName?: str
     setWinnerIdx(-1);
     setFlash(false);
     setDrawing(true); // suspense: the world dims, tickets accelerate and spiral in
-    if (p.phase === 2 && p.connected) void p.claim(); // fire the real winner payout too
+    if (p.phase === 2 && p.drawComplete && p.connected) void p.claim(); // fire the real payout only once a winner exists
     window.setTimeout(() => {
       setWinnerIdx(Math.floor(Math.random() * tickets));
       setDrawing(false); // the cull: losers are eliminated, one survivor erupts

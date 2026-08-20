@@ -104,10 +104,12 @@ export function Classic({ p }: { p: PoolState }) {
               <span className="balance">{p.myBalance === null ? "🔒 hidden" : `${fromUnits(p.myBalance)} coins`}</span>
             </div>
             <div className="row">
-              <button className="primary" disabled={!!p.busy || p.phase !== 2} onClick={p.claim}>
+              <button className="primary" disabled={!!p.busy || p.phase !== 2 || !p.drawComplete} onClick={p.claim}>
                 {p.busy === "claim" ? "Collecting…" : "🎁 Collect my winnings"}
               </button>
-              {p.phase !== 2 && <span className="muted">This lights up once a winner has been picked.</span>}
+              {!(p.phase === 2 && p.drawComplete) && (
+                <span className="muted">This lights up once the host has drawn a winner (Host controls → “Pick winner”).</span>
+              )}
             </div>
           </section>
 
@@ -147,7 +149,7 @@ export function Classic({ p }: { p: PoolState }) {
                   {p.busy === "reveal-seed" ? "…" : "3 · Reveal secret"}
                 </button>
                 <button className="ghost" disabled={!!p.busy || p.phase !== 2} onClick={p.draw}>
-                  {p.busy === "draw" ? "…" : "4 · Pick winner"}
+                  {p.busy === "draw" ? "…" : "4 · Pick winner (the spin)"}
                 </button>
                 <button className="ghost" disabled={!!p.busy} onClick={p.close}>
                   {p.busy === "close" ? "…" : "Start next round"}

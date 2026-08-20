@@ -25,6 +25,7 @@ export function usePool(POOL: string = POOL_ADDRESS) {
   const [roundId, setRoundId] = useState(0n);
   const [jackpot, setJackpot] = useState(0n);
   const [count, setCount] = useState(0n);
+  const [drawComplete, setDrawComplete] = useState(false);
   const [owner, setOwner] = useState<string>();
   const [publicTotal, setPublicTotal] = useState<bigint | null>(null);
   const [myBalance, setMyBalance] = useState<bigint | null>(null);
@@ -41,18 +42,20 @@ export function usePool(POOL: string = POOL_ADDRESS) {
   const refresh = useCallback(async () => {
     const pool = new ethers.Contract(POOL, POOL_ABI, readProvider);
     try {
-      const [ph, rid, jp, ct, ow] = await Promise.all([
+      const [ph, rid, jp, ct, ow, dc] = await Promise.all([
         pool.phase(),
         pool.roundId(),
         pool.jackpot(),
         pool.participantsCount(),
         pool.owner(),
+        pool.drawComplete(),
       ]);
       setPhase(Number(ph));
       setRoundId(rid);
       setJackpot(jp);
       setCount(ct);
       setOwner(ow);
+      setDrawComplete(Boolean(dc));
     } catch {
       /* rpc hiccup */
     }
@@ -135,10 +138,19 @@ export function usePool(POOL: string = POOL_ADDRESS) {
   const claim = () =>
     run("claim", async () => {
       const c = new ethers.Contract(POOL, POOL_ABI, signer);
-      const tx = await c.claim({ gasLimit: FHE_GAS });
-      say(`Claim ${short(tx.hash)} … (winner payout)`);
-      await tx.wait();
-      say("✓ Claim settled — reveal your balance to see if you won.");
+      let tx: ethers.ContractTransactionResponse;
+      try {
+        tx = await c.claim({ gasLimit: FHE_GAS });
+      } catch {
+        throw new Error("Nothing to collect yet — a winner hasn't been drawn, or you've already collected this round.");
+      }
+      say(`Collecting ${short(tx.hash)} …`);
+      try {
+        await tx.wait();
+      } catch {
+        throw new Error("Couldn't collect — the winner hasn't been drawn yet, or you've already collected this round.");
+      }
+      say("✓ Collected — reveal your balance to see if you won.");
     });
 
   const withdraw = (amount: number) =>
@@ -216,6 +228,7 @@ export function usePool(POOL: string = POOL_ADDRESS) {
     roundId,
     jackpot,
     count,
+    drawComplete,
     isOwner,
     publicTotal,
     myBalance,
