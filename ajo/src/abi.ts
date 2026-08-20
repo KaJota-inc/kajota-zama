@@ -10,22 +10,45 @@ export const CUSDT_ABI = [
 
 export const ORACLE_ABI = ["function reportCount(bytes32) view returns (uint32)"] as const;
 
-// Sealed-bid chit fund (bidding hui) — public state for the showcase.
+// Sealed-bid chit fund (bidding hui) — full interactive surface.
 export const CHIT_ABI = [
   "function pot() view returns (uint64)",
   "function phase() view returns (uint8)",
   "function roundId() view returns (uint256)",
   "function membersCount() view returns (uint256)",
   "function biddersCount() view returns (uint256)",
+  "function tallyComplete() view returns (bool)",
   "function settleComplete() view returns (bool)",
+  "function owner() view returns (address)",
+  "function isMember(address) view returns (bool)",
+  "function balanceOf(address) view returns (bytes32)",
+  "function winningBid() view returns (bytes32)",
+  "function submitBid(bytes32 encBid, bytes proof)",
+  "function tallyBids(uint256 count)",
+  "function settle(uint256 count)",
+  "function claim(uint256 r)",
+  "function fundPot(uint64 amount)",
+  "function openBidding()",
+  "function withdraw(bytes32 encAmount, bytes proof)",
+  "event BidSubmitted(uint256 indexed roundId, address indexed bidder)",
+  "event Settled(uint256 indexed roundId, uint256 cursor, bool complete)",
 ] as const;
 
-// Confidential tontine (survivorship pool) — public state for the showcase.
+// Confidential tontine (survivorship pool) — full interactive surface.
 export const TONTINE_ABI = [
   "function activeCount() view returns (uint256)",
   "function accDividend() view returns (uint64)",
   "function totalDistributed() view returns (uint64)",
   "function membersCount() view returns (uint256)",
+  "function owner() view returns (address)",
+  "function active(address) view returns (bool)",
+  "function pendingDividend(address) view returns (uint64)",
+  "function balanceOf(address) view returns (bytes32)",
+  "function payDividend(uint64 amount)",
+  "function syncDividend()",
+  "function exit()",
+  "function withdraw(bytes32 encAmount, bytes proof)",
+  "event DividendPaid(uint64 amount, uint256 activeCount, uint64 perShare, uint64 accDividend)",
 ] as const;
 
 export const POOL_ABI = [

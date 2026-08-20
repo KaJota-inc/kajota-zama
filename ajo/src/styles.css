@@ -1302,3 +1302,14 @@ details.host .row:last-child {
 .mech-live {
   color: var(--ok);
 }
+
+.mech-open {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 6px;
+}
+.mech-open.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

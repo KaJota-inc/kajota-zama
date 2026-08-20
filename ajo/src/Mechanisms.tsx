@@ -105,6 +105,7 @@ export function Mechanisms() {
           name="Premium Bonds"
           tag="Random draw"
           address={POOL_ADDRESS}
+          href="#"
           blurb="No-loss savings whose pooled interest is paid out as a lottery, drawn by a random-number machine (ERNIE). This is essentially what Àjọ already is."
           crux="Winner = a public commit-revealed seed over encrypted, time-weighted balances. Provably fair, nobody sees a balance."
           stats={premium}
@@ -115,6 +116,7 @@ export function Mechanisms() {
           name="Chit fund"
           tag="Sealed-bid auction"
           address={CHIT_ADDRESS}
+          href="#chit"
           blurb="A rotating pool where each round is a sealed-bid auction: the highest bidder takes the pot now, at a discount — and that discount is split among everyone else."
           crux="Winner = a homomorphic argmax over encrypted bids. A sealed-bid auction is the canonical thing FHE is for — bids never leave ciphertext."
           stats={chit}
@@ -124,6 +126,7 @@ export function Mechanisms() {
           name="Tontine"
           tag="Survivorship"
           address={TONTINE_ADDRESS}
+          href="#tontine"
           blurb="Members pool money and share the yield; each time one exits, their share redistributes to the rest — so the dividend grows as the group shrinks. Banned in 1905 for opacity."
           crux="Payout = a survivor dividend that grows as the active set shrinks. Principal stays encrypted; only the fair per-survivor rate is public."
           stats={tontine}
@@ -143,6 +146,7 @@ function MechCard({
   name,
   tag,
   address,
+  href,
   blurb,
   crux,
   stats,
@@ -152,6 +156,7 @@ function MechCard({
   name: string;
   tag: string;
   address: string;
+  href: string;
   blurb: string;
   crux: string;
   stats: Stat[];
@@ -185,6 +190,10 @@ function MechCard({
           </div>
         )}
       </dl>
+
+      <a className={`primary mech-open${deployed ? "" : " disabled"}`} href={deployed ? href : undefined} aria-disabled={!deployed}>
+        {live ? "Open the pool →" : "Open this pool →"}
+      </a>
 
       <div className="mech-foot">
         {live && <span className="mech-live">● the live Àjọ pool</span>}

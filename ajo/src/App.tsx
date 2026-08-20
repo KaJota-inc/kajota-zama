@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePool } from "./usePool";
 import { Classic } from "./Classic";
 import { Game } from "./Game";
@@ -6,6 +6,8 @@ import { Evidence } from "./Evidence";
 import { Shield } from "./Shield";
 import { Circles } from "./Circles";
 import { Mechanisms } from "./Mechanisms";
+import { ChitView } from "./ChitView";
+import { TontineView } from "./TontineView";
 import { POOL_ADDRESS } from "./config";
 import { allCircles } from "./circleStore";
 
@@ -21,7 +23,40 @@ export default function App() {
   if (route === "#evidence") return <Evidence />;
   if (route === "#shield") return <Shield />;
   if (route === "#mechanisms") return <Mechanisms />;
+  if (route === "#chit") return <MechPage pill="Chit fund" name="Sealed-bid chit fund"><ChitView /></MechPage>;
+  if (route === "#tontine") return <MechPage pill="Tontine" name="Survivorship tontine"><TontineView /></MechPage>;
   return <Shell />;
+}
+
+function MechPage({ pill, name, children }: { pill: string; name: string; children: ReactNode }) {
+  return (
+    <div className="wrap">
+      <header>
+        <div className="brand">
+          <h1>
+            À<span className="accent">jọ</span>
+          </h1>
+          <span className="pill">{pill}</span>
+        </div>
+        <p className="sub">
+          <b>{name}</b> — one of three ways history pooled money, rebuilt confidentially on the same encrypted rail. Try
+          it with free test coins.
+        </p>
+        <nav>
+          <a className="link" href="#mechanisms">
+            ← All three mechanisms
+          </a>
+          <a className="link" href="#">
+            Home
+          </a>
+          <a className="link" href="#evidence">
+            Evidence ↗
+          </a>
+        </nav>
+      </header>
+      {children}
+    </div>
+  );
 }
 
 function Shell() {
