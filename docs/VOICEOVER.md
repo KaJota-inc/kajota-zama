@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDED — old Season-3 "KaJota Confidential Pay" copy.** For the current Àjọ (Confidential PoolTogether, S4) narration, use the clean script in **[DEMO.md](./DEMO.md)**. Kept only for reference. (Zama disqualifies AI voice — record this yourself.)
+
 # Voiceover script — synced to `kajota-zama-demo-full.mp4` (≈ 1:55)
 
 Read each line as its scene appears (the on-screen caption matches). There are multi-second holds between scenes, so you

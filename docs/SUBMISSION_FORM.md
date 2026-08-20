@@ -1,26 +1,27 @@
-# Paste-ready submission fields — Zama Developer Program S3
+# Paste-ready submission fields — Zama Developer Program S4 (Confidential PoolTogether)
 
-Copy each block into the matching field on the Zama submission form. All fields are filled (demo video:
-https://youtu.be/pJaa-LLA-M4).
+Copy each block into the matching field on the Zama submission form. Demo video link goes in on publish.
+
+> Facts verified 2026-08-20: bare `npx hardhat test` → **38 passing**, of which the Àjọ pool (17) + Shield (8) + bridge (4) = **29** — the other 8 are a **legacy S3 `ConfidentialPay` suite unrelated to this submission** (recommend removing `contracts/ConfidentialPay.sol` + `test/ConfidentialPay.ts` for a clean 30). App + evidence page return 200; all contract + circle addresses read live on Sepolia. Re-verify before you actually submit (esp. the video link).
 
 ---
 
 **Project name**
 
 ```
-KaJota Confidential Pay
+Àjọ — Confidential PoolTogether
 ```
 
 **Tagline / one-liner** (≤ ~120 chars)
 
 ```
-Confidential payments on Ethereum: balances and transfer amounts stay Fully-Homomorphically Encrypted on-chain.
+A platform of confidential no-loss savings circles: encrypted balances, a publicly-verifiable draw, and a shared trust circle.
 ```
 
-**Track(s)**
+**Track / bounty**
 
 ```
-Builder Track + Special TokenOps Track
+Confidential PoolTogether bounty (Mainnet Season 4)
 ```
 
 **Network**
@@ -34,7 +35,7 @@ Ethereum Sepolia (chainId 11155111)
 **Short description** (~50 words)
 
 ```
-A confidential payments dApp built on Zama's FHEVM. Every balance is an encrypted euint64 and every transfer amount is encrypted client-side, so the chain stores and computes on ciphertext only. It also ships a confidential multi-recipient disperse flow for the TokenOps track.
+Àjọ is digital esusu on Zama FHEVM: a platform of confidential no-loss prize-savings circles. Deposits, balances and winnings are euint64 ciphertext; each round a public seed drives a single-winner draw computed entirely over encrypted, time-weighted balances — no decryption, no trusted scorer. Anyone can launch a circle; a confidential mandate even lets safe autonomous agents save in.
 ```
 
 ---
@@ -42,18 +43,24 @@ A confidential payments dApp built on Zama's FHEVM. Every balance is an encrypte
 **Full description**
 
 ```
-On a normal ERC-20, everyone can see exactly how much you hold and how much you send. For real payments — payroll, remittances, supplier invoices — that public leak is a dealbreaker. KaJota is an African fintech settling payments on-chain, and FHEVM is the missing primitive: confidential balances with public verifiability.
+Àjọ is a confidential PoolTogether: users deposit into a shared pool, the pooled yield is drawn as a prize each round, and principal is withdrawable at any time — with deposits, balances and winnings encrypted end-to-end, and winner selection verifiable on-chain. It rebuilds no-loss prize-savings on Zama's FHEVM so the money stays private while the fairness stays public.
 
-KaJota Confidential Pay puts payments on-chain without the leak:
+THE CRUX — A FAIR DRAW THAT STAYS ENCRYPTED (this is the property the bounty asks for, and the heart of the project). PoolTogether V5 picks a winner with a cumulative check (PRN % totalSupply < winningZone). Àjọ keeps that model but evaluates it over encrypted balances with public randomness and ZERO decryption, selecting exactly one winner:
+ • a public commit-revealed seed r gives target = (r · drawTotal) / 2^64
+ • we walk participants carrying an encrypted running prefix; won_i = (prefix_i ≤ target) ∧ (target < prefix_i + balance_i)
+Odds are time-weighted (a TWAB accumulator) so nobody can snipe the pool right before a draw. There is no ct×ct multiply and no on-chain decryption — anyone can recompute target from the public seed and audit the draw, yet every balance stays ciphertext.
 
-• Encrypted state — each balance is a euint64 handle to a ciphertext; no clear amount is ever stored.
-• Encrypted inputs — the sender encrypts the amount in the browser with the Zama relayer SDK, producing an externalEuint64 handle + a ZK input proof bound to (contract, sender), ingested with FHE.fromExternal.
-• Compute on ciphertext — a transfer never branches on a clear value. Affordability is an encrypted comparison (FHE.le) and the moved amount is chosen with FHE.select, so an overspend silently moves 0 instead of reverting. The failure path is on-chain-indistinguishable from a funded transfer, leaking nothing about either balance.
-• Access control — after every mutation the contract re-grants decryption rights with FHE.allowThis and FHE.allow(handle, owner), so only the account owner can user-decrypt their balance via the relayer's EIP-712 handshake.
+CONFIDENTIAL BY CONSTRUCTION.
+ • Encrypted state — deposits, balances and winnings are euint64 handles; no clear amount is ever stored. The rail is ConfidentialUSDT, an OpenZeppelin ERC-7984 confidential token.
+ • Encrypted deposits — confidentialTransferAndCall carries a client-encrypted amount straight into the pool; the receiver's ebool is allowThis'd + allowTransient'd so the transfer settles.
+ • True no-loss — principal is withdrawable any time; only the round's yield is at stake, and only the winner can decrypt their prize. Over-withdraw clamps to your balance (FHE.select) instead of reverting, so failure leaks nothing.
+ • Owner-only decryption — the FHE ACL (allow/allowThis) means only the position owner can user-decrypt, via the relayer's EIP-712 handshake.
 
-For the TokenOps track, confidentialDisperse splits a private balance across many recipients in one transaction — a confidential airdrop / payout flow where no per-recipient amount is ever public.
+NO MOCKED DATA. The full deposit→commit→reveal→tallyDraw→runDraw→claim→withdraw lifecycle is verified on Sepolia (tx list below). 29 tests pass across the pool and its extensions.
 
-Everything is live and verifiable on Sepolia: a deployed contract, a confidential faucet tx that runs FHE operations on-chain, and a real confidential transfer where the amount travels as ciphertext.
+BEYOND THE CORE (real-world, production ambition — secondary to the confidential PoolTogether above). Àjọ is digital esusu, the West-African rotating-savings circle, which was always two things: a pot that rotates fairly AND a trust circle that remembers who to trust. On top of a complete confidential PoolTogether, two extensions show what a confidential app looks like in the real world:
+ • A PLATFORM, NOT ONE POOL — a directory of confidential circles browsable as a 3D galaxy; anyone can launch their own in one browser transaction and land inside it as owner.
+ • THE TRUST CIRCLE, RESTORED — a confidential spend mandate (encrypted per-agent cap, allow-list, guardian kill-switch) plus a shared, privacy-preserving fraud memory (reveals only "aggregate ≥ threshold", never a single report) let even a safe autonomous agent save into a pool without ever exposing balances. The agent bridge is live on-chain.
 ```
 
 ---
@@ -61,7 +68,15 @@ Everything is live and verifiable on Sepolia: a deployed contract, a confidentia
 **How it uses Zama / FHE** (if a dedicated field exists)
 
 ```
-Built on @fhevm/solidity 0.11 with the FHEVM Hardhat plugin, and @zama-fhe/relayer-sdk 0.4 on the frontend for client-side encryption and EIP-712 user-decryption. Core on-chain logic operates entirely on encrypted euint64 values: FHE.fromExternal to ingest client ciphertext, FHE.le + FHE.select for leak-free affordability, FHE.add/FHE.sub for the transfer, and the FHE ACL (allow/allowThis) for owner-only decryption. Deployed and exercised on Ethereum Sepolia.
+Built on @fhevm/solidity 0.11 + the FHEVM Hardhat plugin, OpenZeppelin @openzeppelin/confidential-contracts 0.5 (ERC-7984), and @zama-fhe/relayer-sdk on the frontend for client-side encryption and EIP-712 user-decryption.
+
+On-chain logic runs entirely over encrypted euint64/euint128:
+• FHE.fromExternal ingests client ciphertext (externalEuint64 + input proof bound to contract+sender).
+• The draw carries an encrypted running prefix and tests (FHE.le / FHE.lt) a public target against it — a single-winner selection over ciphertext with a public, recomputable seed and NO on-chain decryption and no ct×ct multiply.
+• Time-weighted odds via a TWAB accumulator (FHE.add/sub/mul-by-scalar/div-by-scalar).
+• Leak-free money movement: FHE.select clamps over-withdraw / over-mandate / flagged-counterparty flows to 0 instead of reverting, so the failure path is on-chain-indistinguishable from success.
+• FHE ACL (allow / allowThis / allowTransient) gives owner-only decryption and lets ERC-7984 transferAndCall settle.
+Draws are paginated one participant per tx to stay under the FHEVM HCU depth limit. Deployed and exercised on Ethereum Sepolia.
 ```
 
 ---
@@ -72,32 +87,51 @@ Built on @fhevm/solidity 0.11 with the FHEVM Hardhat plugin, and @zama-fhe/relay
 https://github.com/KaJota-inc/kajota-zama
 ```
 
-**Live demo (Vercel)**
+**Live demo**
 
 ```
-https://kajota-confidential-pay.vercel.app
+https://ajo-confidential.vercel.app
 ```
 
-**Live contract (Sepolia)**
+**No-login evidence page** (live on-chain activity + draw verifier)
 
 ```
-0xe4292f6aF1FA9668713269bE1643354a557BF342
-https://sepolia.etherscan.io/address/0xe4292f6aF1FA9668713269bE1643354a557BF342
+https://ajo-confidential.vercel.app/#evidence
 ```
 
-**On-chain proof transactions**
+**Live contracts (Sepolia, verified)**
 
 ```
-Deploy:                0xf472bdd53ab58a964c14fb262e02720af1ed7da225cc7a19aa9da03016e45770
-Confidential faucet:   0xea75f60314ac0bcecd4ffde34d1fc2f5cd9443e88c5da652a2d3254f56ed1504
-Confidential transfer: 0x54a6b4dc47a7550597ef6639b323e391d4c1841d63476ff071cb5add2933f8c6
-Confidential disperse: 0x38c680f4b75ac46d423606417671555e235f203349d37053b0588e0fce98e541
+ConfidentialPool (Àjọ, "Weekly Àjọ")   0x885843C8110aEe5eFe3c69810ef89790AB74767A
+ConfidentialUSDT (cUSDT, ERC-7984)     0x6Be1122CE0e08DBD847f0C02cfc6188246F790B8
+AgentMandate (Shield)                  0x5BA600798E834E12b48648488C7eb12d92e0a32c
+FraudOracle (Shield trust circle)      0x14C93328e19e602Fd6d63bcC90053eB8b7537BAc
+
+Other live circles in the platform:
+Agent Treasury (trusted)               0x2C6F01FcA31578b68fe01dfb299e34114fe6a626
+Quick Draw (flagged by the oracle)     0x99A2c50A6Cc6484EA98e70873888d4AC913e6b65
+```
+
+**On-chain proof transactions** (canonical Weekly Àjọ lifecycle + agent bridge)
+
+```
+1  faucet cUSDT                       0x3ec52a52e3af1703ca24dfa188a03f99b334d157109622d580ec86209e2da6c9
+2  deposit (transferAndCall)          0xefcd6431460e548bc68f969339af1ab305c41976dce8202a6876c220c6869d5c
+3  harvestYield (fund jackpot)        0xe269f4dd9d945035c0633eb0c42e3f2279bcdae68200e07efb9cf9117c8604ec
+4  commitRound                        0x9ced5f58028be9e7383e6c56031a829da9057669cd3d509ea3c58bac601886b1
+5  revealSeed (public randomness)     0xb852e6d4ed39a46c2ac66073ef27ed6bd8facdc9f087a75443e795d279ade31d
+6  tallyDraw (time-weighted odds)     0x2e8d566129e317ebd61e7bd8ef3a205cd671b6ae9b831c68380a085e3e2fe20c
+7  runDraw (encrypted single-winner)  0xd4d7ea604878136301228ad6a25299d6e4dc28dfd4565bcb205bfd18b19adf40
+8  claim (winner payout)              0x42505e287af995a9534fc4a2dc451a99b2bde0a7e14e86e67f75044b867c9b8d
+9  disclosePublicTotal                0x2f35aec4f68935d35ff918086c97b6d983359af1bc779ea27e108b4c0df1bda3
+10 withdraw (principal + jackpot)     0x6b5240775f662818df35a188479b7aa69eb619298223f949f024bce55f11092a
+🛡 agent saves into the pool (bridge) 0xa8482b7c458b276645dfd5fded8be505970ce1cc957bb1d5f63490f0434738bc
 ```
 
 **Demo video**
 
 ```
-https://youtu.be/pJaa-LLA-M4
+(recording — paste the YouTube link on publish)
 ```
 
 ---
@@ -105,5 +139,5 @@ https://youtu.be/pJaa-LLA-M4
 **Tech stack** (if asked)
 
 ```
-Solidity 0.8.27 · @fhevm/solidity 0.11 · @fhevm/hardhat-plugin · @zama-fhe/relayer-sdk 0.4 · Vite + React + TypeScript · ethers v6 · Ethereum Sepolia
+Solidity 0.8.27 · @fhevm/solidity 0.11 · @fhevm/hardhat-plugin · @openzeppelin/confidential-contracts 0.5 (ERC-7984) · @zama-fhe/relayer-sdk · Vite + React + TypeScript + ethers v6 · Three.js / react-three-fiber (3D galaxy) · Ethereum Sepolia
 ```
