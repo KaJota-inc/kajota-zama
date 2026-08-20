@@ -61,9 +61,10 @@ CONFIDENTIAL BY CONSTRUCTION.
 
 NO MOCKED DATA. The full deposit→commit→reveal→tallyDraw→runDraw→claim→withdraw lifecycle is verified on Sepolia (tx list below). 29 tests pass across the pool and its extensions.
 
-BEYOND THE CORE (real-world, production ambition — secondary to the confidential PoolTogether above). Àjọ is digital esusu, the West-African rotating-savings circle, which was always two things: a pot that rotates fairly AND a trust circle that remembers who to trust. On top of a complete confidential PoolTogether, two extensions show what a confidential app looks like in the real world:
+BEYOND THE CORE (real-world, production ambition — secondary to the confidential PoolTogether above). Àjọ is digital esusu, the West-African rotating-savings circle, which was always two things: a pot that rotates fairly AND a trust circle that remembers who to trust. On top of a complete confidential PoolTogether, three exhibits show what the primitive makes possible:
  • A PLATFORM, NOT ONE POOL — a directory of confidential circles browsable as a 3D galaxy; anyone can launch their own in one browser transaction and land inside it as owner.
  • THE TRUST CIRCLE, RESTORED — a confidential spend mandate (encrypted per-agent cap, allow-list, guardian kill-switch) plus a shared, privacy-preserving fraud memory (reveals only "aggregate ≥ threshold", never a single report) let even a safe autonomous agent save into a pool without ever exposing balances. The agent bridge is live on-chain.
+ • THREE WAYS HISTORY POOLED MONEY — PoolTogether is only the newest of many pooled-money schemes, and the older ones died for the same reason: you had to trust an operator with the books. FHE removes that trade-off, so the same encrypted rail also runs a sealed-bid CHIT FUND (winner = a homomorphic argmax over encrypted bids; discount split to the rest) and a survivorship TONTINE (dividend grows as members exit; banned in 1905 for the opacity FHE fixes). Both are new contracts, mock-FHE tested, deployed + Etherscan-verified on Sepolia with live state. An exhibit of the primitive — the confidential PoolTogether is the submission.
 ```
 
 ---

@@ -27,14 +27,17 @@ each round, withdraw principal any time — **money stays private while the fair
   the prize. Over-withdraw **clamps to your balance** (`FHE.select`) instead of reverting, so failure leaks nothing.
 
 **Beyond the core** — Àjọ is digital _esusu_, which was always a pot _and_ a trust circle. On top of a complete
-confidential PoolTogether, two extensions show what a real-world confidential app looks like (secondary to the core
-above):
+confidential PoolTogether, three exhibits show what the primitive makes possible (secondary to the core above):
 
 - **A platform, not one pool** — a directory of circles, browsable as a **3D galaxy**; **launch your own in one
   transaction** and land inside it as owner.
 - **The trust circle, restored** — a confidential spend **mandate** (encrypted cap, allow-list, kill-switch) + a
   privacy-preserving shared **fraud memory** (reveals only "aggregate ≥ threshold", never a single report) let even a
   _safe autonomous agent_ save into a pool without exposing balances. The agent bridge is live on-chain.
+- **Three ways history pooled money** — the same encrypted rail also runs a sealed-bid **chit fund** (winner = a
+  homomorphic argmax over encrypted bids) and a survivorship **tontine** (dividend grows as members exit; banned in 1905
+  for opacity). Both new contracts, mock-FHE tested, deployed + Etherscan-verified on Sepolia. Live at
+  [/#mechanisms](https://ajo-confidential.vercel.app/#mechanisms).
 
 ## Verifiable now (Sepolia)
 

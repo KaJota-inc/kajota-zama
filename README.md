@@ -24,6 +24,10 @@ PoolTogether, Àjọ shows what a production, real-world confidential app looks 
 - 🛡️ **The trust circle, restored** — a confidential spend **mandate** (encrypted cap, allow-list, kill switch) plus a
   shared, privacy-preserving **fraud memory** let even a _safe autonomous agent_ save into a pool without ever exposing
   balances. (See _The trust circle_ below.)
+- 🏛️ **Three ways history pooled money** — the same encrypted rail runs _three_ different pool mechanisms: the
+  random-draw **Premium Bonds** (1956), a sealed-bid **chit fund** (a homomorphic argmax over encrypted bids), and a
+  survivorship **tontine** (1653). History banned the last two for opacity; FHE brings them back. (See _History's
+  confidential pools_ below.)
 
 > **Event:** Zama Developer Program — Mainnet Season 4, _Confidential PoolTogether_ bounty (5,000 cUSDT, up to 3
 > winners; grand prize = **OpenZeppelin audit + production launch**). Built for production from line one.
@@ -135,6 +139,28 @@ exceed.
 Shield is **deployed + verified on Sepolia** and **live-flow tested** (approved save → over-budget block → flagged-pool
 block → hijack → kill switch). Contracts: `contracts/shield/`; a premium operator console runs at
 [kajota-hub.onrender.com/shield](https://kajota-hub.onrender.com/shield).
+
+---
+
+## History's confidential pools (a "beyond the core" exhibit)
+
+The bounty asks for one confidential pool; the core above delivers it. But **PoolTogether is only the most recent of
+many ways humans have pooled money**, and almost every earlier scheme died for the same reason: you had to trust an
+operator with the books. FHE is the first technology that removes that trade-off — private books that stay publicly
+verifiable — so the same encrypted cUSDT rail can run mechanisms history had to abandon. Three are live on Sepolia:
+
+| Mechanism                     | Origin              | How the winner / payout is decided (over ciphertext)                                                                                                                                                                     | Contract                                                                                                    |
+| ----------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Premium Bonds**             | England, 1956       | Public commit-revealed seed over encrypted, time-weighted balances — the random draw. **This is the core Àjọ pool.**                                                                                                     | `ConfidentialPool` (above)                                                                                  |
+| **Chit fund** (bidding _hui_) | S. India, 1000+ yrs | Members submit **encrypted sealed bids**; the winner is a **homomorphic argmax over ciphertext** (two-pass, single-winner). Winner takes `pot − bid`; the forgone discount splits to the rest.                           | [`0x76Ae6C2C…39B3b`](https://sepolia.etherscan.io/address/0x76Ae6C2C20e3793AFB2b0982b60B147d2DA39B3b#code)  |
+| **Tontine**                   | France, 1653        | Principal stays encrypted; yield splits among survivors and the **per-survivor dividend grows as members exit**. Tontines were _banned in 1905_ (the Armstrong Investigation) for opacity — the exact failure FHE fixes. | [`0x0C60677B…041c5B`](https://sepolia.etherscan.io/address/0x0C60677B8a486Ff4f2C2ee50041415B969041c5B#code) |
+
+Why this belongs to FHE specifically: a **sealed-bid auction is the canonical "compute a winner over secret inputs"
+problem** — the thing FHE is uniquely for — and a **tontine's** whole historical failure was opacity. Both are new
+contracts (`contracts/ConfidentialChit.sol`, `contracts/ConfidentialTontine.sol`), reuse the proven ERC-7984 deposit /
+`_credit` / withdraw scaffolding, pass mock-FHE tests (`test/mechanisms/`), and are Etherscan-verified with live seed
+state. Browse them at **[/#mechanisms](https://ajo-confidential.vercel.app/#mechanisms)**. This is an exhibit of _what
+the primitive makes possible_ — the confidential PoolTogether above remains the submission.
 
 ---
 
