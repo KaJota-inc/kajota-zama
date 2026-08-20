@@ -2,10 +2,11 @@
 
 Copy each block into the matching field on the Zama submission form. Demo video link goes in on publish.
 
-> Facts verified 2026-08-20: bare `npx hardhat test` → **38 passing**, of which the Àjọ pool (17) + Shield (8) + bridge
-> (4) = **29** — the other 8 are a **legacy S3 `ConfidentialPay` suite unrelated to this submission** (recommend
-> removing `contracts/ConfidentialPay.sol` + `test/ConfidentialPay.ts` for a clean 30). App + evidence page return 200;
-> all contract + circle addresses read live on Sepolia. Re-verify before you actually submit (esp. the video link).
+> Facts verified 2026-08-20: bare `npx hardhat test` → **40 passing**, of which the Àjọ pool (17) + Shield (8) + bridge
+> (4) = **29**, +2 for the chit fund + tontine mechanisms; the remaining 9 are a **legacy S3 `ConfidentialPay` suite +
+> demo-run harness unrelated to this submission** (recommend removing `contracts/ConfidentialPay.sol` +
+> `test/ConfidentialPay.ts` for a cleaner tree). App + evidence page return 200; all contract + circle addresses read
+> live on Sepolia. Re-verify before you actually submit (esp. the video link).
 
 ---
 

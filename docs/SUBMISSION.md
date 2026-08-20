@@ -48,8 +48,8 @@ confidential PoolTogether, three exhibits show what the primitive makes possible
   `0x5BA60079…0a32c` · FraudOracle `0x14C93328…37BAc`
 - **Proof trail:** the full deposit→commit→reveal→tallyDraw→runDraw→claim→withdraw lifecycle + the agent bridge, as real
   Sepolia txs (see README table / SUBMISSION_FORM.md).
-- **Tests:** the Àjọ pool + Shield + bridge suites → **29 passing** (`npx hardhat test` runs 38 in total; the extra 8
-  are a legacy S3 `ConfidentialPay` suite unrelated to this submission).
+- **Tests:** the Àjọ pool + Shield + bridge suites → **29 passing** (`npx hardhat test` runs 40 in total: +2 for the
+  chit fund + tontine mechanisms, +9 for a legacy S3 `ConfidentialPay` suite and demo-run harness).
 
 ## Stack
 

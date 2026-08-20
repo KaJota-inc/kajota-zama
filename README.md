@@ -244,7 +244,7 @@ cd kajota-zama && git checkout hackathon/zama-season4
 npm install
 
 npx hardhat compile
-npx hardhat test        # 38 passing — Àjọ lifecycle (17) + Shield (8) + agent bridge (4) + legacy/demo-run (9)
+npx hardhat test        # 40 passing — Àjọ (17) + Shield (8) + bridge (4) + chit/tontine (2) + legacy/demo-run (9)
 ```
 
 The frontend lives in `ajo/` (`npm install && npm run dev`). Deploy scripts and the Sepolia address book live under
