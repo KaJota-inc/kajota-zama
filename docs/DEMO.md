@@ -14,12 +14,15 @@ mechanisms) as a fast montage. Do **not** open on the 3D games — they read as 
 
 ## Before you record (staging — do once)
 
-1. **MetaMask on Sepolia**, funded with a little test ETH. Use a fresh account so the get-coins/deposit beats look
-   clean.
+1. **MetaMask on Sepolia**, funded with a little test ETH. **Record with the operator wallet** (`0xC58A77…`, the
+   `.secret.mnemonic` account) — it's the pool's _sole_ participant, so it wins the draw with certainty. A fresh account
+   would be a second, time-disfavored ticket and could lose on camera. Do one **Take out** (drains to 0 via `FHE.min`)
+   before the take so Beat 3/4's "500" reads clean. Pool is already primed to Open · round #1 · 250-coin pot.
 2. **Warm the WASM**: load the app, connect, do one throwaway **Show my balance** so the ~5 MB FHE WASM is cached —
    otherwise the first encrypt in your take stalls ~10 s.
-3. Use the **Weekly Àjọ** pool (the default) for the lifecycle beats — it already holds a live jackpot and a depositor,
-   so the draw lands.
+3. Use the **Weekly Àjọ** pool (the default) for the lifecycle beats. It must start on a **fresh round** — `stage-round`
+   runs `commitRound`, which reverts while a round is still open, so clear any in-flight round to "Open" first (ask me —
+   ~1 min on-chain).
 4. Keep a terminal ready for the one operator step:
    ```bash
    node scripts/stage-round.mjs 250      # funds a 250-coin prize, commits + reveals
@@ -41,7 +44,7 @@ mechanisms) as a fast montage. Do **not** open on the 3D games — they read as 
 | 4            | 0:50–1:08 | **🔓 Show my balance** → sign the EIP-712 popup → reveals **500 coins**.                                                                                                                    | "On-chain my balance reads as encrypted. To see it, the network checks a signature only I can give and hands the number to me alone. No one else can run this."                                                                                                                                                                                                                  |
 | 5            | 1:08–1:20 | Terminal: `node scripts/stage-round.mjs 250` → "REVEALED — claims are open".                                                                                                                | "A keeper runs the round — it funds the prize, commits to a secret seed, then reveals it."                                                                                                                                                                                                                                                                                       |
 | **6 (CRUX)** | 1:20–1:54 | Evidence `/#evidence` → open the **revealSeed** tx, then the **runDraw** tx on Etherscan → the "Check the draw was fair" tool recomputes the same numbers.                                  | "Here's the seed, public on Etherscan — anyone reads it. The winner is weighted by a _time-weighted_ deposit, but the whole check runs over encrypted balances: a public target versus an encrypted running prefix. Anyone recomputes the target from the seed and audits the draw — yet every balance stays ciphertext. No decryption, no trusted scorer. **That's the crux.**" |
-| 7            | 1:54–2:12 | Back to app → **🎁 Collect** → **Show my balance** now **750** → **Take out**.                                                                                                              | "I collect — my encrypted balance jumps by the prize, and only I can see it. It's no-loss: I withdraw principal plus winnings any time. Over-withdraw just clamps to my balance — it never reverts, so it never leaks how much I had."                                                                                                                                           |
+| 7            | 1:54–2:12 | Back to app → **🎁 Collect** → **Show my balance** now **1,000** → **Take out**.                                                                                                              | "I collect — my encrypted balance jumps by the prize, and only I can see it. It's no-loss: I withdraw principal plus winnings any time. Over-withdraw just clamps to my balance — it never reverts, so it never leaks how much I had."                                                                                                                                           |
 | 8 (breadth)  | 2:12–2:42 | **Fast montage** — cut between: **Circles → Galaxy** (dive into a ring) · **＋ Create a circle** (one tx, land inside) · **🛡️ Shield** console · **History** page (chit fund + tontine 3D). | "Because it's built for the real world, it's more than one pool. It's a whole platform of confidential circles you can launch in one transaction. A confidential mandate even lets a _safe autonomous agent_ save in under an encrypted cap. And the same rail runs pooled-money ideas history abandoned — a sealed-bid chit fund and a survivorship tontine — all live."        |
 | 9 (close)    | 2:42–3:00 | Evidence proof trail + the Àjọ hero.                                                                                                                                                        | "No mocked data — the full lifecycle is live on Sepolia, thirty-two tests green, on OpenZeppelin's ERC-7984 and Zama FHEVM. A fair draw that stays encrypted, that anyone can verify. _Esusu_, on-chain."                                                                                                                                                                        |
 
