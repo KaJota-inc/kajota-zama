@@ -137,6 +137,12 @@ Quick Draw (flagged by the oracle)     0x99A2c50A6Cc6484EA98e70873888d4AC913e6b6
 https://youtu.be/H8bBK-OWG0Q
 ```
 
+**X thread / article**
+
+```
+https://x.com/Oluwabori6/status/2096354780750794945
+```
+
 ---
 
 **Tech stack** (if asked)
