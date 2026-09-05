@@ -39,7 +39,7 @@ Browse it all as a 3D galaxy — or launch your own circle in one tx.
 ---
 
 **5/** No mocked data — the full deposit → yield → draw → claim → withdraw lifecycle _and_ the agent bridge are live on
-Sepolia, 29 tests green.
+Sepolia, 32 tests green.
 
 Verify it yourself, no login → https://ajo-confidential.vercel.app/#evidence Code →
 https://github.com/KaJota-inc/kajota-zama Demo → https://youtu.be/cLANMyLWkL8

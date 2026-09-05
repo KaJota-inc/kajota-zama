@@ -58,7 +58,7 @@ CONFIDENTIAL BY CONSTRUCTION.
  • True no-loss — principal is withdrawable any time; only the round's yield is at stake, and only the winner can decrypt their prize. Over-withdraw clamps to your balance (FHE.select) instead of reverting, so failure leaks nothing.
  • Owner-only decryption — the FHE ACL (allow/allowThis) means only the position owner can user-decrypt, via the relayer's EIP-712 handshake.
 
-NO MOCKED DATA. The full deposit→commit→reveal→tallyDraw→runDraw→claim→withdraw lifecycle is verified on Sepolia (tx list below). 29 tests pass across the pool and its extensions.
+NO MOCKED DATA. The full deposit→commit→reveal→tallyDraw→runDraw→claim→withdraw lifecycle is verified on Sepolia (tx list below). 32 tests pass across the pool and its extensions.
 
 BEYOND THE CORE (real-world, production ambition — secondary to the confidential PoolTogether above). Àjọ is digital esusu, the West-African rotating-savings circle, which was always two things: a pot that rotates fairly AND a trust circle that remembers who to trust. On top of a complete confidential PoolTogether, three exhibits show what the primitive makes possible:
  • A PLATFORM, NOT ONE POOL — a directory of confidential circles browsable as a 3D galaxy; anyone can launch their own in one browser transaction and land inside it as owner.
