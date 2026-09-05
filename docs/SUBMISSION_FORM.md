@@ -134,7 +134,7 @@ Quick Draw (flagged by the oracle)     0x99A2c50A6Cc6484EA98e70873888d4AC913e6b6
 **Demo video**
 
 ```
-https://youtu.be/cLANMyLWkL8
+https://youtu.be/H8bBK-OWG0Q
 ```
 
 ---

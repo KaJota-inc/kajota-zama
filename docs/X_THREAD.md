@@ -42,4 +42,4 @@ Browse it all as a 3D galaxy — or launch your own circle in one tx.
 Sepolia, 32 tests green.
 
 Verify it yourself, no login → https://ajo-confidential.vercel.app/#evidence Code →
-https://github.com/KaJota-inc/kajota-zama Demo → https://youtu.be/cLANMyLWkL8
+https://github.com/KaJota-inc/kajota-zama Demo → https://youtu.be/H8bBK-OWG0Q
