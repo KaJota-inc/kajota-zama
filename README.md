@@ -193,7 +193,7 @@ possible_ — the confidential PoolTogether above remains the submission.
 | 🛡️  | **agent saves into the pool (Shield bridge)** | [`0xa8482b7c…434738bc`](https://sepolia.etherscan.io/tx/0xa8482b7c458b276645dfd5fded8be505970ce1cc957bb1d5f63490f0434738bc)  |
 
 **Live demo:** https://ajo-confidential.vercel.app · **No-login evidence page:**
-https://ajo-confidential.vercel.app/#evidence · **Demo video:** _(recording — link added on publish)_
+https://ajo-confidential.vercel.app/#evidence · **Demo video:** https://youtu.be/cLANMyLWkL8
 
 ---
 
