@@ -58,8 +58,8 @@ Pre-colonial West African rotating credit association, modernised. The organiser
 | 26 beacon tests passing | ✅ `fb3771c` | me |
 | Deploy script → sepolia + galileo | ✅ `5ac748f` + `scripts/beacon/deploy-sakk-esusu.mjs` | me |
 | **MandateAnchor LIVE on Sepolia** | ✅ [`0x7A4C…2504`](https://sepolia.etherscan.io/address/0x7A4C3c92cbf3cd3442B55bcFacdBdECfDF6a2504) · anchor #1 @ block 11858585 | ✅ |
-| **SakkMandate LIVE on Sepolia** | ✅ [`0x0949…49c1`](https://sepolia.etherscan.io/address/0x0949aAa551d2Ea18D18b48D36063C9d7ce8349c1) | ✅ |
-| **EsusuMandate LIVE on Sepolia** | ✅ [`0x4634…b9fd`](https://sepolia.etherscan.io/address/0x463463D0eE28fEdE89525cc28A261301f14Ab9fd) | ✅ |
+| **SakkMandate LIVE on Sepolia** | ✅ [`0x0949…49c1`](https://sepolia.etherscan.io/address/0x0949aAa551d2Ea18D18b48D36063C9d7ce8349c1) · [seed seal](https://sepolia.etherscan.io/tx/0xeb6361408fadea77966e8610986699067e6d12c58f27e4636a7617ff3ec55114) @ block 11858671 | ✅ |
+| **EsusuMandate LIVE on Sepolia** | ✅ [`0x4634…b9fd`](https://sepolia.etherscan.io/address/0x463463D0eE28fEdE89525cc28A261301f14Ab9fd) · [seed seal](https://sepolia.etherscan.io/tx/0x6a8fc41d2242dc360a1a0b9b7c1172c029cfe67090eac5c8a1ff43d9efd8b2d1) @ block 11858672 | ✅ |
 | Etherscan source verification (all 3) | ⬜ `npx hardhat verify --network sepolia <addr>` once `ETHERSCAN_API_KEY` is set | user to set key; me to run |
 | Chainlink CRE workflow YAML | ⬜ Oct 11 target per project memory | me (next) |
 | 3D scene + action HUD per [[feedback_history_3d_hack_approach]] | ⬜ | me |
