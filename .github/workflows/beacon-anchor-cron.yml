@@ -1,0 +1,116 @@
+name: Beacon anchor runner (Sepolia)
+
+# Posts one Mandate Beacon anchor on Sepolia every 6 hours during the BLI build window.
+# This is the playbook move #1 ("prove earnings over time") — the submission's judge-visible
+# docs/beacon/sepolia-deployment.md still refreshes while judges look.
+#
+# Secrets required (set once by the repo owner under Settings → Secrets and variables → Actions):
+#   DEPLOYER_MNEMONIC  — the funded Sepolia mnemonic (same one that signed
+#                         deploy-mandate-anchor.mjs). The workflow writes it to .secret.mnemonic
+#                         at runtime and the file is destroyed when the job ends.
+#
+# Workflow permissions required:
+#   contents: write  (to commit docs/beacon/sepolia-deployment.md updates)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 */6 * * *"  # 7 min past every 6th hour
+
+concurrency:
+  group: beacon-anchor-sepolia
+  cancel-in-progress: false
+
+jobs:
+  anchor:
+    if: github.ref == 'refs/heads/hackathon/bli-mandate-beacon'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hackathon/bli-mandate-beacon
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Load mnemonic
+        env:
+          DEPLOYER_MNEMONIC: ${{ secrets.DEPLOYER_MNEMONIC }}
+        run: |
+          if [ -z "${DEPLOYER_MNEMONIC}" ]; then
+            echo "::error::DEPLOYER_MNEMONIC secret not set; configure it under Settings → Secrets"
+            exit 1
+          fi
+          printf "%s" "${DEPLOYER_MNEMONIC}" > .secret.mnemonic
+          chmod 600 .secret.mnemonic
+
+      - name: Restore local deployment file from branch state
+        # The deployment JSON is gitignored; re-fetch its canonical seed from the previous workflow
+        # artifact so the sequence counter does not reset to 1 on every run.
+        uses: actions/download-artifact@v4
+        with:
+          name: beacon-sepolia-deployment
+          path: deployments
+        continue-on-error: true
+
+      - name: Seed deployment file if missing
+        run: |
+          mkdir -p deployments
+          if [ ! -f deployments/beacon-sepolia.json ]; then
+            cat > deployments/beacon-sepolia.json <<'EOF'
+          {
+            "network": "sepolia",
+            "chainId": 11155111,
+            "deployer": "0xC58A7717fdf1Bc40dFb63b02ab54D6CF6c8F7093",
+            "slaWindowSeconds": 86400,
+            "MandateAnchor": {
+              "address": "0x7A4C3c92cbf3cd3442B55bcFacdBdECfDF6a2504",
+              "txHash": "0x5827375bc9fb699bd284d965162661afef4be6f2c8a21f474cdaee9056bd7105"
+            },
+            "allowBankTx": "0x54df67ae298bcdf0847bb24097dd1a0cedff42d9e8e38a42f213fe92642a304a",
+            "deployedAt": "2026-10-06T21:45:14.601Z",
+            "branch": "hackathon/bli-mandate-beacon",
+            "lastSequence": 1,
+            "anchors": []
+          }
+          EOF
+          fi
+
+      - name: Anchor one mandate
+        run: node scripts/beacon/anchor-mandate.mjs
+
+      - name: Persist deployment file for next run
+        uses: actions/upload-artifact@v4
+        with:
+          name: beacon-sepolia-deployment
+          path: deployments/beacon-sepolia.json
+          overwrite: true
+          retention-days: 60
+
+      - name: Shred the mnemonic
+        if: always()
+        run: shred -u .secret.mnemonic 2>/dev/null || rm -f .secret.mnemonic
+
+      - name: Commit the roster update
+        run: |
+          git config user.name "beacon-anchor-cron"
+          git config user.email "beacon-anchor-cron@users.noreply.github.com"
+          git add docs/beacon/sepolia-deployment.md
+          if git diff --cached --quiet; then
+            echo "no roster change — anchor must have failed before the markdown append"
+            exit 0
+          fi
+          git commit -m "chore(beacon): cron — one more Sepolia anchor"
+          git push origin hackathon/bli-mandate-beacon
