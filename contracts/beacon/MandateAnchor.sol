@@ -17,13 +17,14 @@ contract MandateAnchor {
 
     struct Mandate {
         address bank;
-        bytes32 idempotencyKey; // server-derived: sha256(canonicalMandate ‖ amount ‖ creTickBucket)
-        uint64 amount;          // minor units, PII-redacted customer envelope lives off-chain
-        uint64 postedAt;        // seconds (block.timestamp cast)
-        uint64 deadline;        // postedAt + CBN CPR 2019 window (24h = 86400s)
-        bytes32 envelopeHash;   // sha256 of the redacted customer envelope
+        bytes32 idempotencyKey;      // server-derived: sha256(canonicalMandate ‖ amount ‖ creTickBucket)
+        uint64 amount;               // minor units, PII-redacted customer envelope lives off-chain
+        uint64 postedAt;             // seconds (block.timestamp cast)
+        uint64 deadline;             // postedAt + CBN CPR 2019 window (24h = 86400s)
+        bytes32 envelopeHash;        // sha256 of the redacted customer envelope
+        bytes32 sanctionsListVersion; // pinned list snapshot at ingest; re-verify never follows "current"
         Status status;
-        uint8 occurrence;       // server-assigned; a client-authored value is overwritten
+        uint8 occurrence;            // server-assigned; a client-authored value is overwritten
     }
 
     // ── roles & kill-switch (mirrors AgentMandate.sol pattern) ───────────────────────────────
@@ -51,7 +52,8 @@ contract MandateAnchor {
         bytes32 idempotencyKey,
         uint64 amount,
         uint64 deadline,
-        uint8 occurrence
+        uint8 occurrence,
+        bytes32 sanctionsListVersion
     );
     event MandateSettled(bytes32 indexed mandateId, bytes32 reversalRef, uint64 settledAt);
     event SLABreached(bytes32 indexed mandateId, uint64 deadline, uint64 observedAt);
@@ -70,6 +72,7 @@ contract MandateAnchor {
     error IsPaused();
     error ZeroDeadline();
     error ZeroIdempotencyKey();
+    error ZeroSanctionsListVersion();
     error UnknownMandate();
     error AlreadySettled();
     error NotYetBreached();
@@ -108,29 +111,41 @@ contract MandateAnchor {
 
     /// @notice Post a mandate. The second-tap problem is handled server-side: the caller signs the
     ///         idempotencyKey, the contract assigns the occurrence. A duplicate within the TTL is
-    ///         not rejected — it is routed to human approval via `DuplicateRouted`.
+    ///         not rejected — it is routed to human approval via `DuplicateRouted` and never
+    ///         overwrites the first post. The sanctions-list snapshot is pinned at ingest so a
+    ///         regulator-replay never follows a drifted "current".
     function postMandate(
         bytes32 mandateId,
         bytes32 idempotencyKey,
         uint64 amount,
-        bytes32 envelopeHash
+        bytes32 envelopeHash,
+        bytes32 sanctionsListVersion
     ) external {
         if (!banks[msg.sender]) revert BankNotAllowed();
         if (paused[msg.sender]) revert IsPaused();
         if (idempotencyKey == bytes32(0)) revert ZeroIdempotencyKey();
+        if (sanctionsListVersion == bytes32(0)) revert ZeroSanctionsListVersion();
 
         uint8 next = occurrenceOf[idempotencyKey] + 1;
-        occurrenceOf[idempotencyKey] = next;
         uint64 postedAt = uint64(block.timestamp);
         uint64 deadline = postedAt + slaWindow;
         if (deadline == 0) revert ZeroDeadline();
 
+        // Reorg/replay safety: a mandateId already carrying state is NOT overwritten. An honest
+        // reorg replays into empty state; a same-chain collision is a replay (or a hash accident),
+        // and in either case the regulator-visible chain must preserve the earliest record.
+        if (_m[mandateId].bank != address(0)) {
+            occurrenceOf[idempotencyKey] = next; // still bump — the attempt is observable
+            emit DuplicateRouted(mandateId, idempotencyKey, next, "mandate-id-collision");
+            return;
+        }
+
+        occurrenceOf[idempotencyKey] = next;
+
         if (next > 1) {
-            // duplicate within TTL (or across TTLs, but then still worth a human read) — route
-            // the audit trail to approval and emit a DuplicateRouted row; do NOT auto-settle.
-            emit DuplicateRouted(mandateId, idempotencyKey, next, "replay-within-ttl");
-            // the mandate row is still recorded, with status DuplicateRouted, so the chain carries
-            // a provable count of attempts a judge or regulator can walk.
+            // same idempotencyKey, different mandateId — the replay signature the §2 defect names.
+            // Record the attempt as DuplicateRouted, with the sanctions-list snapshot pinned, and
+            // never auto-settle. Human approval owns the next step.
             _m[mandateId] = Mandate({
                 bank: msg.sender,
                 idempotencyKey: idempotencyKey,
@@ -138,9 +153,11 @@ contract MandateAnchor {
                 postedAt: postedAt,
                 deadline: deadline,
                 envelopeHash: envelopeHash,
+                sanctionsListVersion: sanctionsListVersion,
                 status: Status.DuplicateRouted,
                 occurrence: next
             });
+            emit DuplicateRouted(mandateId, idempotencyKey, next, "replay-within-ttl");
             return;
         }
 
@@ -151,10 +168,19 @@ contract MandateAnchor {
             postedAt: postedAt,
             deadline: deadline,
             envelopeHash: envelopeHash,
+            sanctionsListVersion: sanctionsListVersion,
             status: Status.Posted,
             occurrence: next
         });
-        emit MandatePosted(mandateId, msg.sender, idempotencyKey, amount, deadline, next);
+        emit MandatePosted(
+            mandateId,
+            msg.sender,
+            idempotencyKey,
+            amount,
+            deadline,
+            next,
+            sanctionsListVersion
+        );
     }
 
     /// @notice Mark a mandate settled against a matching reversal.
@@ -189,5 +215,28 @@ contract MandateAnchor {
 
     function isBreached(bytes32 mandateId) external view returns (bool) {
         return _m[mandateId].status == Status.Breached;
+    }
+
+    /// @notice Canonical commitment hash over a mandate's audit-relevant fields. Deterministic,
+    ///         reproducible off-chain, and suitable as a leaf in a Chainlink-CRE-batched Merkle
+    ///         root. The hash deliberately excludes the mutable `status` field so a settled or
+    ///         breached mandate reads the same commitment as the original posting — the status
+    ///         transition is a separate on-chain event, not a rewrite of the audit lineage.
+    function mandateCommitment(bytes32 mandateId) external view returns (bytes32) {
+        Mandate storage m = _m[mandateId];
+        if (m.bank == address(0)) revert UnknownMandate();
+        return keccak256(
+            abi.encode(
+                mandateId,
+                m.bank,
+                m.idempotencyKey,
+                m.amount,
+                m.postedAt,
+                m.deadline,
+                m.envelopeHash,
+                m.sanctionsListVersion,
+                m.occurrence
+            )
+        );
     }
 }
