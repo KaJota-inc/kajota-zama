@@ -56,8 +56,11 @@ Pre-colonial West African rotating credit association, modernised. The organiser
 | Artefact | State | Owner (user vs me) |
 |---|---|---|
 | 26 beacon tests passing | ✅ `fb3771c` | me |
-| Deploy script → sepolia + galileo | ✅ `5ac748f`, dry-run green locally | me (ready); user to fund + run |
-| MandateAnchor + SakkMandate + EsusuMandate verified on Arbiscan/0G Explorer | ⬜ needs funded wallet | user |
+| Deploy script → sepolia + galileo | ✅ `5ac748f` + `scripts/beacon/deploy-sakk-esusu.mjs` | me |
+| **MandateAnchor LIVE on Sepolia** | ✅ [`0x7A4C…2504`](https://sepolia.etherscan.io/address/0x7A4C3c92cbf3cd3442B55bcFacdBdECfDF6a2504) · anchor #1 @ block 11858585 | ✅ |
+| **SakkMandate LIVE on Sepolia** | ✅ [`0x0949…49c1`](https://sepolia.etherscan.io/address/0x0949aAa551d2Ea18D18b48D36063C9d7ce8349c1) | ✅ |
+| **EsusuMandate LIVE on Sepolia** | ✅ [`0x4634…b9fd`](https://sepolia.etherscan.io/address/0x463463D0eE28fEdE89525cc28A261301f14Ab9fd) | ✅ |
+| Etherscan source verification (all 3) | ⬜ `npx hardhat verify --network sepolia <addr>` once `ETHERSCAN_API_KEY` is set | user to set key; me to run |
 | Chainlink CRE workflow YAML | ⬜ Oct 11 target per project memory | me (next) |
 | 3D scene + action HUD per [[feedback_history_3d_hack_approach]] | ⬜ | me |
 | ≤3 min demo video (owner's voice, 1.0× trim only) | ⬜ | user+me |
@@ -68,7 +71,7 @@ Pre-colonial West African rotating credit association, modernised. The organiser
 ## 6. Decision gates still open
 
 - **Oct 11** — Chainlink CRE workflow ships green or Chainlink CRE $2K bounty drops (optional, not Rule-0 anchor).
-- **Oct 20** — all three contracts verified on 0G Galileo or Arb Sepolia. If none by Oct 23, the Rule-0 pitch loses its "verify on Arbiscan" link; the submission still ships but demotes to a floor entry.
+- ~~**Oct 20** — all three contracts verified on 0G Galileo or Arb Sepolia.~~ ✅ **done 2026-10-06** — three live Sepolia addresses now carry the Rule-0 pitch's "verify on Etherscan" links.
 - **Oct 27** — target submit, 5-day buffer.
 - **Oct 28** — kajota-paypal retrofit go/no-go, per `~/Documents/kajota-paypal/docs/planning/mandate-beacon-reuse-brief.md`.
 
