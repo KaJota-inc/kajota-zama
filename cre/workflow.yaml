@@ -3,7 +3,7 @@ staging-settings:
     workflow-name: "beacon-sla-breach-detector-staging"
     deployment-registry: "private"
   workflow-artifacts:
-    workflow-path: "./sla-breach-detector.ts"
+    workflow-path: "./main.ts"
     config-path: "./config.staging.json"
     secrets-path: ""
 
@@ -12,6 +12,6 @@ production-settings:
     workflow-name: "beacon-sla-breach-detector"
     deployment-registry: "private"
   workflow-artifacts:
-    workflow-path: "./sla-breach-detector.ts"
+    workflow-path: "./main.ts"
     config-path: "./config.staging.json"
     secrets-path: ""

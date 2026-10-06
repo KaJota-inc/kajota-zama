@@ -1,6 +1,7 @@
 {
   "schedule": "0 */15 * * * *",
-  "chainSelector": "16015286601757825753",
+  "chainName": "ethereum-testnet-sepolia",
+  "isTestnet": true,
   "mandateAnchor": "0x7A4C3c92cbf3cd3442B55bcFacdBdECfDF6a2504",
   "slaWindowSeconds": 86400,
   "lookbackBlocks": 2880

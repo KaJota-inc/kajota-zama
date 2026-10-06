@@ -43,7 +43,9 @@ write stubbed.
 | --- | --- |
 | `project.yaml` | CRE project-level config: RPC endpoints per environment. |
 | `workflow.yaml` | Workflow-level config: entry file, config path, name, deployment registry. |
-| `sla-breach-detector.ts` | The handler — cron tick → scan logs → log breach candidates. |
+| `main.ts` | Thin entry — instantiates the SDK Runner against `configSchema` and runs `initWorkflow`. |
+| `workflow.ts` | Config schema (zod), event+view ABI slice, `onCron` handler (scan logs → log breach candidates), `initWorkflow` capability wiring. |
+| `package.json` + `tsconfig.json` | SDK + viem + zod deps, strict TypeScript config, `pnpm typecheck` script. |
 | `config.staging.json` | Schedule (`0 */15 * * * *`), Sepolia chain selector, `MandateAnchor` address, SLA window, lookback-block count. |
 
 ## Local simulation
