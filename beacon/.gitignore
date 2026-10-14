@@ -1,5 +1,8 @@
 node_modules
 dist
-public/beacon-sepolia.json
 .vercel
 *.log
+
+# `public/beacon-sepolia.json` is TRACKED — it is the frozen build-time snapshot
+# Vercel ships with. Overwrite in-place with `pnpm sync-manifest` whenever the
+# chain-side manifest changes, then commit + push to trigger a Vercel rebuild.
