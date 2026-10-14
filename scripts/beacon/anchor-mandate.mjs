@@ -25,6 +25,25 @@ const RPCS = [
 ];
 const FIVE_MIN_SECONDS = 300;
 
+function nextSequenceFromRoster() {
+  // Parse the committed roster at docs/beacon/sepolia-deployment.md and return N+1 where N is
+  // the largest sequence number already recorded. Falls back to 1 if the file or table is
+  // missing — this is the first anchor.
+  const rosterPath = path.join(root, "docs", "beacon", "sepolia-deployment.md");
+  if (!fs.existsSync(rosterPath)) return 1;
+  const content = fs.readFileSync(rosterPath, "utf8");
+  // Each anchor row looks like "| 7 | 5971077 | 11858585 | `0x…` | `0x…` | [tx](…) |"
+  // Match only rows whose first cell is a positive integer (header + separator rows don't match).
+  const re = /^\|\s*(\d+)\s*\|/gm;
+  let last = 0;
+  let match;
+  while ((match = re.exec(content)) !== null) {
+    const n = Number(match[1]);
+    if (Number.isFinite(n) && n > last) last = n;
+  }
+  return last + 1;
+}
+
 function readDeployment() {
   const p = path.join(root, "deployments", "beacon-sepolia.json");
   if (!fs.existsSync(p)) {
@@ -99,9 +118,15 @@ async function main() {
   const now = Math.floor(Date.now() / 1000);
   const tickBucket = Math.floor(now / FIVE_MIN_SECONDS);
 
-  // Determine the next sequence by reading recent anchors from the deployment file's log, if
-  // present. First invocation starts at 1.
-  const sequence = (dep.lastSequence ?? 0) + 1;
+  // Determine the next sequence. The committed judge-visible roster at
+  // docs/beacon/sepolia-deployment.md is the ground truth — it survives across runs regardless
+  // of GitHub Actions artifact retention, which is same-run-scoped for actions/download-artifact
+  // v4 and quietly resets the sequence counter when a cron run can't find the previous one.
+  // Fall back to the deployment file (local dev) and finally to 0.
+  const sequence = Math.max(
+    nextSequenceFromRoster(),
+    (dep.lastSequence ?? 0) + 1,
+  );
   const mandate = craftMandate(tickBucket, sequence);
 
   const { abi } = artefact("MandateAnchor");

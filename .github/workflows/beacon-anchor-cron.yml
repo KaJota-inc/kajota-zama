@@ -23,7 +23,12 @@ concurrency:
 
 jobs:
   anchor:
-    if: github.ref == 'refs/heads/hackathon/bli-mandate-beacon'
+    # schedule triggers fire against the default branch (main) regardless of what the YAML's
+    # intended target is — github.ref is 'refs/heads/main' at that point — so filtering only on
+    # ref would silently skip every cron tick. Allow schedule unconditionally (the checkout step
+    # always pulls the beacon branch); keep the branch filter on workflow_dispatch so an
+    # accidental manual dispatch against the wrong ref doesn't post an anchor.
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/hackathon/bli-mandate-beacon'
     runs-on: ubuntu-latest
     permissions:
       contents: write
