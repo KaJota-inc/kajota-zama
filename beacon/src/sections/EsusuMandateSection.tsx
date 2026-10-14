@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import type { BeaconManifest } from "../types";
 import { rotationCommitment } from "../lib/commitment";
+import { EsusuScene3DOperable } from "../scenes/EsusuRing3D";
+import { ViewToggle, type View } from "../components/ViewToggle";
 
 const SEPOLIA_TX = "https://sepolia.etherscan.io/tx/";
 const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
@@ -8,6 +10,7 @@ const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
 export function EsusuMandateSection({ manifest }: { manifest: BeaconManifest }) {
   const c = manifest.EsusuMandate;
   const [verifyExpanded, setVerifyExpanded] = useState(false);
+  const [view, setView] = useState<View>("2d");
 
   const recomputed = useMemo(() => {
     if (
@@ -41,9 +44,26 @@ export function EsusuMandateSection({ manifest }: { manifest: BeaconManifest }) 
     );
   }
 
+  const memberCount = c.seedMembers?.length ?? 3;
+  const collectorOrderIndices = useMemo(() => {
+    if (!c.seedMembers || !c.seedCollectorOrder) return [0, 1, 2];
+    return c.seedCollectorOrder.map((addr) =>
+      c.seedMembers!.findIndex((m) => m.toLowerCase() === addr.toLowerCase()),
+    );
+  }, [c.seedMembers, c.seedCollectorOrder]);
+
   return (
     <article>
-      <h2>EsusuMandate</h2>
+      <div className="section-header">
+        <h2>EsusuMandate</h2>
+        <ViewToggle view={view} onChange={setView} />
+      </div>
+      {view === "3d" && c.seedMembers && (
+        <EsusuScene3DOperable
+          memberCount={memberCount}
+          collectorOrder={collectorOrderIndices}
+        />
+      )}
       <p className="lede">
         The pre-colonial West African rotating-savings mandate. An organiser
         seals a rotation of N members and a fixed collector order; each cycle

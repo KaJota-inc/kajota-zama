@@ -1,10 +1,14 @@
+import { useState } from "react";
 import type { BeaconManifest } from "../types";
+import { SakkScene3DOperable } from "../scenes/SakkSeal3D";
+import { ViewToggle, type View } from "../components/ViewToggle";
 
 const SEPOLIA_TX = "https://sepolia.etherscan.io/tx/";
 const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
 
 export function SakkMandateSection({ manifest }: { manifest: BeaconManifest }) {
   const c = manifest.SakkMandate;
+  const [view, setView] = useState<View>("2d");
   if (!c) {
     return (
       <article>
@@ -13,9 +17,16 @@ export function SakkMandateSection({ manifest }: { manifest: BeaconManifest }) {
       </article>
     );
   }
+  const witnessCount = c.seedWitnesses?.length ?? 3;
   return (
     <article>
-      <h2>SakkMandate</h2>
+      <div className="section-header">
+        <h2>SakkMandate</h2>
+        <ViewToggle view={view} onChange={setView} />
+      </div>
+      {view === "3d" && (
+        <SakkScene3DOperable quorum={2} witnessCount={witnessCount} />
+      )}
       <p className="lede">
         The 10–11c Abbasid sealed Islamic banking instruction. The payer
         commits to a mandate body as a sealed hash, a witness quorum attests,

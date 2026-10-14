@@ -1,4 +1,7 @@
+import { useState } from "react";
 import type { BeaconManifest } from "../types";
+import { MandateScene3DOperable } from "../scenes/MandateClock3D";
+import { ViewToggle, type View } from "../components/ViewToggle";
 
 const SEPOLIA_TX = "https://sepolia.etherscan.io/tx/";
 const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
@@ -7,10 +10,15 @@ export function MandateAnchorSection({ manifest }: { manifest: BeaconManifest })
   const anchors = manifest.anchors ?? [];
   const address = manifest.MandateAnchor.address;
   const slaHours = Math.round(manifest.slaWindowSeconds / 3600);
+  const [view, setView] = useState<View>("2d");
 
   return (
     <article>
-      <h2>MandateAnchor</h2>
+      <div className="section-header">
+        <h2>MandateAnchor</h2>
+        <ViewToggle view={view} onChange={setView} />
+      </div>
+      {view === "3d" && <MandateScene3DOperable />}
       <p className="lede">
         The modern direct-debit mandate: a bank posts a redacted envelope hash,
         a server-authored idempotency key, the SLA deadline, and the pinned
