@@ -39,3 +39,7 @@ Each row is one `postMandate` call. The `commitment` is the on-chain
 | 4 | 5973456 | 11917926 | `0xdd73d3fb…8f65730c` | `0xfc9f1fb1…c4cead54` | Posted |  [tx](https://sepolia.etherscan.io/tx/0xeb1f180cea92bad145dce997ceb56e1c497f1db0c28fde735062cea90c2c044c) |
 | 5 | 5973542 | 11920050 | `0x49ecb7e0…03231b43` | `0xdc6f079d…486fbe96` | Posted |  [tx](https://sepolia.etherscan.io/tx/0x9f47a6f2dcf86b2ab8c17a7da52acb838fd4ee7df0c392d5e8dcb7a3d75110fa) |
 | 6 | 5973608 | 11921687 | `0xaae32d18…3654d5e3` | `0xd3ba7bd3…69796269` | Posted |  [tx](https://sepolia.etherscan.io/tx/0x55269afe5c02ff9744ac16e94dab5e8bd8fa21b3920709184920d4ad89410d71) |
+| 7 | 5973638 | 11922427 | `0x45ef3ea0…cfc9da58` | `0xac0efc0c…43c6450b` | SLABreached (→ #1) | [tx](https://sepolia.etherscan.io/tx/0xb4ca5e4a35f41e691f97afb8db09de4b9a9bf5a0ecd1e2c0a7398dd02bf296a4) |
+| 8 | 5973638 | 11922428 | `0xaae32d18…3654d5e3` | `0xd3ba7bd3…69796269` | Settled (→ #6) | [tx](https://sepolia.etherscan.io/tx/0x28809ef3dc8e3345e62fd0ac3658537b6d2cff1fcd8c9b5003eb77d55f60668a) |
+| 9 | 5973638 | 11922429 | `0x5d754a48…df354b36` | `0x955b4e63…9d69b454` | DuplicateRouted (↻ #1) | [tx](https://sepolia.etherscan.io/tx/0xd9e00b2507350d1396da55d1845bd74b65074fb4a50ed64c2de6bb147d7cf0f0) |
+| 10 | 5973638 | 11922430 | `0xc4f7606f…470db63f` | `0x6b5cf1da…2dbf41bb` | Posted | [tx](https://sepolia.etherscan.io/tx/0x2d7e341137a0551e55bafad5b186f2746fadd32946b7ea56b91a5b0e20464c52) |
