@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { BeaconManifest } from "../types";
-import { SakkScene3DOperable } from "../scenes/SakkSeal3D";
 import { ViewToggle, type View } from "../components/ViewToggle";
+import { SceneLoading } from "../components/SceneLoading";
+
+const SakkScene3DOperable = lazy(() =>
+  import("../scenes/SakkSeal3D").then((m) => ({ default: m.SakkScene3DOperable })),
+);
 
 const SEPOLIA_TX = "https://sepolia.etherscan.io/tx/";
 const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
@@ -25,7 +29,9 @@ export function SakkMandateSection({ manifest }: { manifest: BeaconManifest }) {
         <ViewToggle view={view} onChange={setView} />
       </div>
       {view === "3d" && (
-        <SakkScene3DOperable quorum={2} witnessCount={witnessCount} />
+        <Suspense fallback={<SceneLoading />}>
+          <SakkScene3DOperable quorum={2} witnessCount={witnessCount} />
+        </Suspense>
       )}
       <p className="lede">
         The 10–11c Abbasid sealed Islamic banking instruction. The payer

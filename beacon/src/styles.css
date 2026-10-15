@@ -357,3 +357,13 @@ button.verify:hover {
   border-top: 1px solid var(--rule);
   max-width: 65ch;
 }
+
+.scene-loading .scene-loading-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.03em;
+}

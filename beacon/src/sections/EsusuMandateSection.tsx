@@ -1,8 +1,15 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import type { BeaconManifest } from "../types";
 import { rotationCommitment } from "../lib/commitment";
-import { EsusuScene3DOperable } from "../scenes/EsusuRing3D";
 import { ViewToggle, type View } from "../components/ViewToggle";
+import { SceneLoading } from "../components/SceneLoading";
+
+// Lazy-split: three.js + @react-three/fiber + @react-three/drei together are
+// ~240 kB gzipped; keep them out of the 2D-only critical path, which drops
+// first-paint to ~60 kB gzipped. Chunk loads only when the user toggles 3D.
+const EsusuScene3DOperable = lazy(() =>
+  import("../scenes/EsusuRing3D").then((m) => ({ default: m.EsusuScene3DOperable })),
+);
 
 const SEPOLIA_TX = "https://sepolia.etherscan.io/tx/";
 const SEPOLIA_ADDR = "https://sepolia.etherscan.io/address/";
@@ -59,10 +66,12 @@ export function EsusuMandateSection({ manifest }: { manifest: BeaconManifest }) 
         <ViewToggle view={view} onChange={setView} />
       </div>
       {view === "3d" && c.seedMembers && (
-        <EsusuScene3DOperable
-          memberCount={memberCount}
-          collectorOrder={collectorOrderIndices}
-        />
+        <Suspense fallback={<SceneLoading />}>
+          <EsusuScene3DOperable
+            memberCount={memberCount}
+            collectorOrder={collectorOrderIndices}
+          />
+        </Suspense>
       )}
       <p className="lede">
         The pre-colonial West African rotating-savings mandate. An organiser
