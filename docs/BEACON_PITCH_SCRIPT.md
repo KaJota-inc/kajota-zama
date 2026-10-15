@@ -105,11 +105,13 @@ _(30s · 86 words)_
 
 ### [2:45] CLOSE · hero
 
-> "Three historical mechanisms. One on-chain rail. Twenty-six tests. Three live addresses. Zero PII on-chain. A regulator can replay this submission without a bank login. That is the Mandate Beacon."
+> "Three historical mechanisms. One on-chain rail. Twenty-six tests. Three live addresses. Zero PII on-chain. A regulator can replay this submission without a bank login. Payflow uses it as the audit layer for CBN consumer-dispute SLAs; KaJota's commerce platform will use the same substrate as the trust foundation under informal West African co-sell. That is the Mandate Beacon."
 
-_(10s · 32 words)_
+_(15s · 60 words)_
 
-### Total: 2:55 (± 5s). Word count ≈ 566, ≈ 193 wpm — deliberate but not slow.
+### Total: 3:00 (± 5s). Word count ≈ 594, ≈ 198 wpm — deliberate but not slow.
+
+**Trim-to-fit note:** the close grew by two sentences to land the "substrate not stunt" framing from the KaJota Hustle Engine linkage ([BEACON_BRIEF](./BEACON_BRIEF.md) §9). If the first take overshoots 3:00, drop beat 4 (hard-parts, 20s) first — the HARD_PARTS table lives in the README anyway. Second-cut: shorten the close back to the original 32-word version and surface the KaJota line in the Devpost write-up instead.
 
 ---
 
