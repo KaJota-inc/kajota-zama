@@ -72,6 +72,7 @@ Pre-colonial West African rotating credit association, modernised. The organiser
 
 - **Oct 11** — Chainlink CRE workflow ships green or Chainlink CRE $2K bounty drops (optional, not Rule-0 anchor).
 - ~~**Oct 20** — all three contracts verified on 0G Galileo or Arb Sepolia.~~ ✅ **done 2026-10-06** — three live Sepolia addresses now carry the Rule-0 pitch's "verify on Etherscan" links.
+- ~~**Oct 20 (halfway)** — upstream PR open per [[hackathon_winning_playbook]] move #3.~~ ✅ **open 2026-10-16** — [smartcontractkit/cre-sdk-typescript#326](https://github.com/smartcontractkit/cre-sdk-typescript/pull/326) (draft) fixes [#314](https://github.com/smartcontractkit/cre-sdk-typescript/issues/314): short-circuits `configHandler` on preHook phases with empty config bytes so hooks run. 18/18 runner tests pass on `bun test v1.4.3`. Credits @xavio2495 for the diagnosis. Full merge needed by Oct 27 for full-credit (bursar precedent per [[feedback_winner_teardown_keeperhub]]: OPEN at halfway is partial credit).
 - **Oct 27** — target submit, 5-day buffer.
 - **Oct 28** — kajota-paypal retrofit go/no-go, per `~/Documents/kajota-paypal/docs/planning/mandate-beacon-reuse-brief.md`.
 
