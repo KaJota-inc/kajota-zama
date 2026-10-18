@@ -54,3 +54,4 @@ Each row is one `postMandate` call. The `commitment` is the on-chain
 | 19 | 5974228 | 11936374 | `0xc1ba6e2b…deafc2bc` | `0x0645f3ce…b38337c9` | Posted | [tx](https://sepolia.etherscan.io/tx/0x17406c334aebcf3b07956db3af1221af38f34e49135699c5d01b15f59f8664d6) |
 | 20 | 5974319 | 11938556 | `0x8bc528b0…bf7c7b64` | `0x236c4a71…8d4d5020` | Posted | [tx](https://sepolia.etherscan.io/tx/0x59554862163e5302e2af1625c7ecde1468827c5aaf40e5c0b274f72109bdcaf1) |
 | 21 | 5974400 | 11940558 | `0xa817464f…2f0ba02e` | `0x0001bb66…ffbf31c4` | Posted | [tx](https://sepolia.etherscan.io/tx/0x547e82571919d2c1d8d344582f8d7f22aac0a032d6aa769605635e3b098aeef2) |
+| 22 | 5974460 | 11942028 | `0xa817464f…2f0ba02e` | `0x0001bb66…ffbf31c4` | Settled (→ #21) | [tx](https://sepolia.etherscan.io/tx/0x2234fab5402c1e4ab86c8b5636b93ec4f87ca2d3a98851a4e03f8f65c0f4f190) |
