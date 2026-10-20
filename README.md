@@ -132,7 +132,7 @@ docs/
 |---|---|---|
 | [`kajota-zama`](https://github.com/KaJota-inc/kajota-zama) | `hackathon/bli-mandate-beacon` | **this submission** — contracts + inspector + brief + scripts |
 | `payflow` *(private)* | `main` | Python commitment mirror · 17 round-trip tests · switch-tier pitch |
-| [`kajota-paypal`](https://github.com/KaJota-inc/kajota-paypal) | `feat/mandate-beacon-ap2-plug` | AP2 Payment Mandate adaptation (Reg E anchor instead of CBN CPR) |
+| `kajota-paypal` *(local, pre-public)* | `feat/mandate-beacon-ap2-plug` | AP2 Payment Mandate adaptation (Reg E anchor instead of CBN CPR). Pushed to `KaJota-inc` before the PayPal AI Hackathon submission on 12 Nov 2026. |
 | [`kajota-hub`](https://github.com/KaJota-inc/kajota-hub) | `feat/beacon-route` | [PR #25](https://github.com/KaJota-inc/kajota-hub/pull/25) · beacon as 12th route |
 
 ---
