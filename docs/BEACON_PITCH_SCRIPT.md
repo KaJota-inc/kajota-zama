@@ -17,7 +17,7 @@
 
 | # | Beat | Screen | What the user clicks |
 |---|---|---|---|
-| 1 | Hook | Inspector hero — https://beacon.kajota.io (or Vercel preview) | nothing — just the page |
+| 1 | Hook | Inspector hero — `beacon.kajota.io` (future custom-domain CNAME) or the Vercel preview URL | nothing — just the page |
 | 2 | Problem | Inspector hero + a one-slide black card over it (optional) | nothing |
 | 3 | MandateAnchor | Inspector `/` tab = MandateAnchor | one row in anchors table → Etherscan |
 | 4 | SakkMandate | Inspector `SakkMandate` tab | seal tx → Etherscan |

@@ -1,0 +1,68 @@
+name: README link-smoke
+
+# Verifies that every URL + relative path in the submission's Markdown docs resolves.
+# Fires on any push or PR that touches a tracked .md file, so a judge following any
+# link on the branch cannot land at a dead URL or a missing file.
+#
+# Catches:
+#   - dead external URLs (404, DNS failure, cert error)
+#   - "claimed-public" repos that are actually private (404)
+#   - renamed/removed files that a doc still references
+#   - path-case drift (macOS case-insensitive filesystems hide this locally)
+#
+# Allow-lists known bot-detection false-positives (dorahacks.io returns 405 to
+# curl but 200 to a real browser); see scripts/beacon/link-smoke.sh for the
+# BOT_BLOCKED pattern.
+#
+# Guards playbook move #6 ("failure modes as runnable scripts") for docs the
+# way the unit tests guard the Solidity. Related [[feedback_fact_check_public_posts]].
+
+on:
+  push:
+    branches:
+      - hackathon/bli-mandate-beacon
+      - main
+    paths:
+      - "**.md"
+      - "scripts/beacon/link-smoke.sh"
+      - ".github/workflows/readme-link-smoke.yml"
+  pull_request:
+    paths:
+      - "**.md"
+      - "scripts/beacon/link-smoke.sh"
+      - ".github/workflows/readme-link-smoke.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: readme-link-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure link-smoke is executable
+        run: chmod +x scripts/beacon/link-smoke.sh
+
+      - name: README.md
+        run: ./scripts/beacon/link-smoke.sh README.md
+
+      - name: docs/BEACON_BRIEF.md
+        run: ./scripts/beacon/link-smoke.sh docs/BEACON_BRIEF.md
+
+      - name: docs/BEACON_PITCH_SCRIPT.md
+        run: ./scripts/beacon/link-smoke.sh docs/BEACON_PITCH_SCRIPT.md
+
+      - name: docs/BEACON_UPSTREAM_SCOUT.md
+        run: ./scripts/beacon/link-smoke.sh docs/BEACON_UPSTREAM_SCOUT.md
+
+      - name: docs/WHAT_WE_GOT_WRONG_FIRST.md
+        run: ./scripts/beacon/link-smoke.sh docs/WHAT_WE_GOT_WRONG_FIRST.md
+
+      - name: beacon/DEPLOY.md
+        run: ./scripts/beacon/link-smoke.sh beacon/DEPLOY.md
