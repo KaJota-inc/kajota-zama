@@ -20,7 +20,8 @@ import { z } from "zod";
 // ---------- Config ----------
 
 export const configSchema = z.object({
-  /** cron expression — "0 */15 * * * *" ticks every 15 minutes */
+  // cron expression — ticks every 15 minutes
+
   schedule: z.string(),
   /** chain selector name recognised by @chainlink/cre-sdk's getNetwork; Sepolia is a testnet. */
   chainName: z.string(),
