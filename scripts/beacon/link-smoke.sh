@@ -32,7 +32,7 @@ UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, l
 
 # Hosts whose 403/405 responses to any UA we treat as "bot-detection, judges see 200".
 # Add here only after a browser-click confirms the page is up for a human.
-BOT_BLOCKED='^https?://(dorahacks\.io|www\.linkedin\.com|twitter\.com|x\.com)/'
+BOT_BLOCKED='^https?://(dorahacks\.io|www\.linkedin\.com|twitter\.com|x\.com|claude\.ai)/'
 
 fail=0
 pass=0
@@ -80,6 +80,11 @@ check_path() {
 }
 
 echo "═══ ${MD} — HTTP links ═══"
+# URL char class stops at whitespace, markdown delimiters, inline-code
+# backticks, and sentence-ending punctuation; sed strips trailing
+# punctuation that may still cling (period, comma, colon, semicolon,
+# right-paren without matching left) — the Markdown autolink spec treats
+# these as sentence punctuation, not URL characters.
 while IFS= read -r url; do
   [[ -z $url ]] && continue
   if [[ $url == http://localhost* ]]; then
@@ -87,7 +92,7 @@ while IFS= read -r url; do
     continue
   fi
   check_http "$url"
-done < <(grep -oE 'https?://[^ )]+' "$MD" | sort -u)
+done < <(grep -oE 'https?://[^][ )`"<>'"'"']+' "$MD" | sed 's/[.,:;]*$//' | sort -u)
 
 echo
 echo "═══ ${MD} — relative paths ═══"

@@ -64,5 +64,8 @@ jobs:
       - name: docs/WHAT_WE_GOT_WRONG_FIRST.md
         run: ./scripts/beacon/link-smoke.sh docs/WHAT_WE_GOT_WRONG_FIRST.md
 
+      - name: docs/BEACON_SUBMIT_DRYRUN.md
+        run: ./scripts/beacon/link-smoke.sh docs/BEACON_SUBMIT_DRYRUN.md
+
       - name: beacon/DEPLOY.md
         run: ./scripts/beacon/link-smoke.sh beacon/DEPLOY.md
