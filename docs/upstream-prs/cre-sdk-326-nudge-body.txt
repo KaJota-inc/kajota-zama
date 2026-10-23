@@ -1,0 +1,1 @@
+Friendly ping — happy to rebase, add a changelog line, or extend the test to any additional case you'd like. The runner suite still goes 18/18 against `main` as of today; let me know if there's anything that would move this forward.
