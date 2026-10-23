@@ -67,5 +67,8 @@ jobs:
       - name: docs/BEACON_SUBMIT_DRYRUN.md
         run: ./scripts/beacon/link-smoke.sh docs/BEACON_SUBMIT_DRYRUN.md
 
+      - name: docs/BEACON_RECORDING_DAY.md
+        run: ./scripts/beacon/link-smoke.sh docs/BEACON_RECORDING_DAY.md
+
       - name: beacon/DEPLOY.md
         run: ./scripts/beacon/link-smoke.sh beacon/DEPLOY.md
