@@ -93,3 +93,35 @@ Draft issue text:
 > window`) and emits a candidate log when the window lapses without the matching settlement.
 > Generic across any `(posted, settled, deadline)` triple; the Payflow Mandate Beacon
 > submission uses it against CBN NIP mandates.
+
+## v2 migration — SDK method-surface drift
+
+`workflow.ts` was written against a presumed `EVMClient` surface that `@chainlink/cre-sdk@^1.6.0`
+does not currently expose. Today's `tsc --noEmit` emits four `TS2339` errors on `getBlockNumber`,
+`getLogs`, and `readContract`. Documented as entry #10 in
+[`docs/WHAT_WE_GOT_WRONG_FIRST.md`](../docs/WHAT_WE_GOT_WRONG_FIRST.md); BLI-preflight CI runs
+the typecheck job with `continue-on-error: true` so the signal stays visible without gating
+the submission branch.
+
+The real surface (from `node_modules/@chainlink/cre-sdk/dist/.../evm-helpers.d.ts` docstrings):
+
+| Current `workflow.ts` call | v2 rewrite target | Notes |
+|---|---|---|
+| `evm.getBlockNumber(runtime).result()` | `evm.headerByNumber(runtime, {}).result().header.blockNumber` + `protoBigIntToBigint(...)` | Returns a `ProtoBigInt` wrapped in a header struct, not a bare `bigint`. |
+| `evm.getLogs(runtime, {address, fromBlock, toBlock, event})` | `evm.filterLogs(runtime, { filter: { addresses: [address], fromBlock: bigintToProtoBigInt(fromBlock), toBlock: bigintToProtoBigInt(toBlock), topics: [[eventTopicHash]] } })` | Topic filtering is positional; event decoding becomes a client-side `decodeEventLog` pass. |
+| `evm.readContract(runtime, {abi, address, functionName, args})` | `evm.callContract(runtime, { call: encodeCallMsg({ to: address, data: encodeFunctionData({abi, functionName, args}) }), blockNumber: bigintToProtoBigInt(block) })` | Request takes a pre-encoded `CallMsg`; viem's `encodeFunctionData` is the standard pairing. |
+
+**Why defer rather than rewrite today**
+
+1. The write path (`emitSLABreach` on-chain) is explicitly v2 scope per the top of this README;
+   the read-only workflow is a reference implementation of the SLA-breach-detector shape,
+   not a live production ingest.
+2. BLI submission ships against the GitHub Actions `anchor-mandate.mjs` cron
+   ([playbook move #1](../docs/BEACON_BRIEF.md)); the CRE workflow is additive, not critical path.
+3. The SDK is pre-1.0-stable semantically (even though the package number is `1.x`); rewriting
+   today risks another drift before v2 lands. The explicit `TS2339` errors act as an alarm clock
+   when the API freezes.
+
+**v2 definition-of-done:** `cre-typecheck` CI job drops `continue-on-error: true` and the BLI
+preflight job turns full green. Target: once SDK major version pins (or when migrating to
+`emitSLABreach` write-path), whichever first.
