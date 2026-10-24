@@ -66,7 +66,7 @@ Pre-colonial West African rotating credit association, modernised. The organiser
 | ≤3 min demo video (owner's voice, 1.0× trim only) | ⬜ | user+me |
 | Devpost submission form walk per [[feedback_submission_form_rules_first]] | ⬜ | user |
 | 2 000-char Devpost paste | ⬜ (see §7 below) | me |
-| Live hosted inspector URL | ⬜ kajota-hub route planned (`beacon` slot) | me+user |
+| Live hosted inspector URL | ✅ [`kajota-mandate-beacon.vercel.app`](https://kajota-mandate-beacon.vercel.app) (prod · Vercel) + [`kajota-hub.onrender.com/beacon/`](https://kajota-hub.onrender.com/beacon/) (hub route via [PR #25](https://github.com/KaJota-inc/kajota-hub/pull/25)) | ✅ both live |
 
 ## 6. Decision gates still open
 

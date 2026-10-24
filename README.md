@@ -66,8 +66,8 @@ Deployer: [`0xC58A7717fdf1Bc40dFb63b02ab54D6CF6c8F7093`](https://sepolia.ethersc
 
 | Surface | URL | Purpose |
 |---|---|---|
-| **Vercel inspector** | `kajota-mandate-beacon.vercel.app` *(pending `vercel --prod`)* | CDN-latency judging surface, 2D/3D toggle, in-browser verifier |
-| **kajota-hub inspector** | `kajota-hub.onrender.com/beacon/` *(pending [PR #25](https://github.com/KaJota-inc/kajota-hub/pull/25) merge)* | Hub-aggregation path, 12th route alongside the other eleven services |
+| **Vercel inspector** | [`kajota-mandate-beacon.vercel.app`](https://kajota-mandate-beacon.vercel.app) ✅ live | CDN-latency judging surface, 2D/3D toggle, in-browser verifier |
+| **kajota-hub inspector** | [`kajota-hub.onrender.com/beacon/`](https://kajota-hub.onrender.com/beacon/) ✅ live ([PR #25](https://github.com/KaJota-inc/kajota-hub/pull/25) merged) | Hub-aggregation path, 12th route alongside the other eleven services |
 | **Anchor runner** | `.github/workflows/beacon-anchor-cron.yml` | Variable-reward 60/25/10/5 mix (fresh / settled / replay / breached) · adds 4 rows/day while the window runs |
 | **Chainlink CRE workflow** | `cre/workflow.ts` | Read-only SLA-breach oracle (write path deferred to v2) |
 
