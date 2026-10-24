@@ -33,9 +33,9 @@ Record each beat as its own clip (no live tab-switching); `ffmpeg` concatenates 
 
 ### [0:00] HOOK · hero
 
-> "Three historical payment mandates — Napoleonic direct debit, the Abbasid *sakk*, the Yoruba *esusu* — brought back on-chain, so a regulator can replay the audit without ever seeing a customer's PII. This is Mandate Beacon."
+> "This is the settlement rail every mandate-based payment system needs. One contract. Three historical mechanisms the ancient world got right and modern finance threw away — Napoleonic direct debit, the Abbasid sakk, the Yoruba esusu — all live on Sepolia right now. A regulator and a hustler read the exact same hash."
 
-_(10s · 36 words at ≈ 160 wpm, deliberate pace)_
+_(12s · 48 words at ≈ 160 wpm, deliberate pace. Leads with the primitive, names three mechanisms, closes with the two-audience symmetry — regulator + hustler same hash — which is the Hustle Engine's 'did I earn' linkage in one line.)_
 
 ### [0:10] PROBLEM · hero stays on
 
