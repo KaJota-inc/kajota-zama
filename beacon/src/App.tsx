@@ -48,8 +48,11 @@ export default function App() {
       <header className="hero">
         <h1>Mandate Beacon</h1>
         <p className="tagline">
-          Regulator-replayable payment-dispute SLAs — three historical
-          mechanisms, one on-chain rail, no customer PII on-chain.
+          The settlement rail every mandate-based payment system needs. One
+          contract. Three historical mechanisms the ancient world got right
+          and modern finance threw away — Napoleonic direct debit (1804),
+          Abbasid <em>sakk</em> (10c), Yoruba <em>esusu</em> (pre-colonial) —
+          live on Sepolia. A regulator and a hustler read the exact same hash.
         </p>
         <p className="chain">
           <strong>{manifest.network}</strong> · chainId{" "}
